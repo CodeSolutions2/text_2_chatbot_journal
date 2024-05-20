@@ -9,4 +9,4 @@ Chat-bot technology used in a self-transformative manner can be the start of a n
 4. be more responsible such that everyone can have a positive future,
 5. and live a happier and healthier life.
 
-Input text data and/or other data into a journal, train a chatbot with the journal data, ask the chatbot questions about the journal data for understanding one's self.
+Input text data and/or other data into a journal, train a chatbot with the journal data, ask the chatbot questions about the journal data for better self understanding.
