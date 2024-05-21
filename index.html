@@ -119,14 +119,15 @@ async function run_OpenAI_assistant() {
 // ----------------------------------------------------
 // Step 2 : dropdown B (run_QandA_finetuning)
 // ----------------------------------------------------
+	
 async function run_QandA_finetuning() {
+	
+	// Read in text data, Display text data in textarea
+	await GET_text_from_file_wo_auth_GitHub_RESTAPI()
+		// Sort text by timestamp
+		.then(async function() {  await sort_text_by_timestamp(transcribed_text) })
 
-  // Read in text data, Display text data in textarea
-  await GET_text_from_file_wo_auth_GitHub_RESTAPI()
-  // Sort text by timestamp
-    .then(async function() {  await sort_text_by_timestamp(transcribed_text) })
-  //
-
+		// More steps to add here
 	
 		.then(async function(text_by_date) { 
 			// Processing information
@@ -152,14 +153,24 @@ async function run_QandA_finetuning() {
 // ----------------------------------------------------
 async function run_QandA_finetuning_vector_sim() {
 
-	
+	// Read in text data, Display text data in textarea
+	await GET_text_from_file_wo_auth_GitHub_RESTAPI()
+		// Sort text by timestamp
+		.then(async function() {  await sort_text_by_timestamp(transcribed_text) })
+		
+		// More steps to add here
+		
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 }
 
 
-  
+
+
+
+
+	
 // ----------------------------------------------------
-// SUBFUNCTIONS: Step 2 : dropdown B (run_QandA_finetuning)
+// SUBFUNCTIONS
 // ----------------------------------------------------
 async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
 	
