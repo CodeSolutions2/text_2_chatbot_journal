@@ -10,3 +10,5 @@ Chat-bot technology used in a self-transformative manner can be the start of a n
 5. and live a happier and healthier life.
 
 Input text data and/or other data into a journal, train a chatbot with the journal data, ask the chatbot questions about the journal data for better self understanding.
+
+https://codesolutions2.github.io/text_2_chatbot_journal/index.html
