@@ -269,8 +269,6 @@ async function upload_files() {
 			let output = JSON.parse(JSON.stringify(result));
 			FILE_ID = output['id'];
 			document.getElementById('output_FILE_ID').innerHTML = FILE_ID;
-			document.getElementById('input_FILE_ID').value = FILE_ID; 
-			document.getElementById('input_FILE_ID').placeholder = FILE_ID;
 		})
 		.then(async function() { document.getElementById('notification').innerHTML = "STEP A upload_files finished." })
 	 	.catch(error => { document.getElementById('error').innerHTML = error; });
@@ -318,8 +316,6 @@ async function create_an_assistant() {
 			let output = JSON.parse(JSON.stringify(res));
 			ASSISTANT_ID = output['id'];
 			document.getElementById('output_ASSISTANT_ID').innerHTML = ASSISTANT_ID;
-			document.getElementById('input_ASSISTANT_ID').value = ASSISTANT_ID;
-			document.getElementById('input_ASSISTANT_ID').placeholder = ASSISTANT_ID;
 		})
 		.then(async function() { document.getElementById('notification').innerHTML = "STEP B create_an_assistant finished." })
 		.catch(error => { document.getElementById('error').innerHTML = error; });
@@ -367,8 +363,6 @@ async function create_a_thread() {
 			let output = JSON.parse(JSON.stringify(result));
 			THREAD_ID = output['id'];
 			document.getElementById('output_THREAD_ID').innerHTML = THREAD_ID;
-			document.getElementById('input_THREAD_ID').value = THREAD_ID;
-			document.getElementById('input_THREAD_ID').placeholder = THREAD_ID;
 		})
 		.then(async function() { document.getElementById('notification').innerHTML = "STEP C create_a_thread finished." })
 	 	.catch(error => { document.getElementById('error').innerHTML = error; });
@@ -444,8 +438,6 @@ async function run_the_assistant() {
 			let output = JSON.parse(JSON.stringify(result));
 			RUN_ID = output['id'];
 			document.getElementById('output_RUN_ID').innerHTML = RUN_ID;
-			document.getElementById('input_RUN_ID').value = RUN_ID;
-			document.getElementById('input_RUN_ID').placeholder = RUN_ID;
 		})
 		.then(async function() { document.getElementById('notification').innerHTML = "STEP E run_the_assistant finished." })
 	 	.catch(error => { document.getElementById('error').innerHTML = error; });
