@@ -5,10 +5,11 @@
 
 <h1>Text-to-chatbot webapp</h1>
 <ol type="A">
-	<li>Input GitHub repository url to file</li>
-	<li></li>
-	<li></li>
-	<li></li>
+	<li>Input GitHub repository url to file.</li>
+	<li>Select method type to create a chatbot: OpenAI Assistant, Q&A finetuning, Q&A finetuning and Vector Similarity.</li>
+	<li>View notification or errors about chatbot creation.</li>
+	<li>View select text from the file.</li>
+	<li>Chat with chatbot about the text in the file.</li>
 </ol>
 
 <!-- ---------------------------------------- -->
@@ -24,29 +25,28 @@
 <input id="file_download_url" type="text" value="" placeholder="file_download_url" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
 <input id="prompt" type="text" value="" placeholder="prompt" rows="10" cols="100" style="display:none; text-align: left; width: 600px;">
 
-<h3>[Step 2] Select method type to create a chatbot</h3>
+<h3>[Step 1] Select method type to create a chatbot</h3>
+<select name="chatbot_method_list" id="chatbot_method_list">
+<option value="openai_assistant">OpenAI Assistant</option>
+<option value="q_and_a_finetuning">Q&A finetuning</option>
+<option value="q_and_a_finetuning_vec_sim">Q&A finetuning and Vector Similarity</option>
+</select> 
 
-OpenAI Assistant
-  Q&A finetuning
-  Q&A finetuning and Vector Similarity
-  
-  Run OpenAI Assistant OR Q&A finetuning
-<input id="OPENAI_API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
-
+<input id="OPENAI_API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:none; text-align: left; width: 150px;">
 
 <br>
-<h3>[Step 3] View notifications and errors</h3>
+<h3>[Step 2] View notifications and errors</h3>
 <div id="notification"></div>
 <div id="error"></div>
 <br>
-<h3>[Step 4] View Selected text</h3>
+<h3>[Step 3] View Selected text</h3>
 <textarea id="selected_text" rows="35" cols="100" placeholder="Selected Text" style="display:block" width:100px; height: 200px;></textarea>
 </th>
 
 <!-- ---------------------------------------- -->
 
 <th id="outputs">
-<h3>[Step 5] Chatbot Area</h3>
+<h3>[Step 4] Chatbot Area</h3>
 <!-- ---------------------------------------- -->
 <!-- View chatbot -->
 <input id="prompt_input" type="text" value="" placeholder="Ask the chatbot a question about the text" rows="10" cols="100" style="display:block; text-align: left;  height: 50px; width:300px;"><button id="use_chatbot" onclick="use_chatbot()">[Step 4] Ask chatbot</button>
