@@ -21,7 +21,7 @@
 <th id="inputs">
 <h1></h1>
 
-<h3>[Step 0] Input GitHub repository url to file to include in the analysis (ie: https://github.com/CodeSolutions2/text_2_chatbot_journal/main/journal_data.txt).</h3>
+<h3>[Step 0] Input GitHub repository url to file to include in the analysis (ie: https://raw.githubusercontent.com/CodeSolutions2/text_2_chatbot_journal/main/journal_data.txt).</h3>
 <input id="file_download_url" type="text" value="" placeholder="file_download_url" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
 Write a Question or request about the text in the file:
 <input id="prompt" type="text" value="" placeholder="prompt" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
@@ -105,8 +105,6 @@ var create_an_assistant_description ="";
 var create_an_assistant_instructions = "";
 var create_a_thread_content ="";
 var add_a_message_to_a_thread_content = "";
-
-var journal_filename = "journal_data.txt";
 	
 var month = {"01": "january", "02": "february", "03": "march", "04": "april", "05": "may", "06": "june", "07": "july", "08": "august", "09": "september", "10": "october", "11": "november", "12": "december"};
 
@@ -119,10 +117,10 @@ async function run_selection() {
 
 	if (chatbot_method == 'openai_assistant') {
 		// Step A
-	upload_files_filename = document.getElementById("file_download_url").value.split("/").pop();
-	console.log("upload_files_filename: ", upload_files_filename);
+		upload_files_filename = document.getElementById("file_download_url").value.split("/").pop();
+		console.log("upload_files_filename: ", upload_files_filename);
 
-	// ------------------------
+		// ------------------------
 
 var prompt = document.getElementById("prompt").value; 
 	      
@@ -156,9 +154,9 @@ var prompt = document.getElementById("prompt").value;
 // ----------------------------------------------------
 async function run_OpenAI_assistant() {
 
-	
-	// Step A: outputs FILE_ID
-	await upload_files()
+	await GET_text_from_file_wo_auth_GitHub_RESTAPI()
+		// Step A: outputs FILE_ID
+		.then(async function() { await upload_files(); })
 		// Step B: outputs ASSISTANT_ID
 		.then(async function() { await create_an_assistant(); })
 		// Step C: outputs THREAD_ID
@@ -581,7 +579,7 @@ async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
 		.then(res => res.json())
 		.then(data => { 
 			data.forEach(async function(file) {
-				var regexp = new RegExp(`${journal_filename}`, 'g');
+				var regexp = new RegExp(`${upload_files_filename}`, 'g');
 				if (file.type === 'file' && file.name.match(regexp)) {
 					file_objects.push(file);
 				}
@@ -590,9 +588,10 @@ async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
 		})
 		.then(async function (file_objects) {
 			var file_object = file_objects.at(0);
+			console.log("file_object: ", file_object)
 		   
 			var file_download_url = file_object.download_url;
-			// console.log("file_download_url:", file_download_url);
+			console.log("file_download_url:", file_download_url);
 		   
 			sha_val = file_object.sha;
 			// console.log("sha_val:", sha_val);
@@ -601,11 +600,11 @@ async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
 		})
 		.then(async function (file_download_url) {
 			// Way 1: to get text from file
-			var text_out = await fetch(file_download_url); return text_out
+			return await fetch(file_download_url);
 		})
 		.then(response => response.text())
 		.then(async function(text_out) { 
-			document.getElementById("selected_text").innerHTML = text_out;  // print existing journal in text area
+			document.getElementById("selected_text").innerHTML = text_out;  // print in text area
 			return text_out;
 		})
 		.catch(error => { console.log(error); });
