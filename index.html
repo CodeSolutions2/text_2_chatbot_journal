@@ -235,8 +235,7 @@ async function run_QandA_finetuning_vector_sim() {
 // Step A
 async function upload_files() {
 	
-	await assign_the_task_prompts()
-		.then(async function() { return await fetch(document.getElementById("file_download_url").value); })
+	await fetch(document.getElementById("file_download_url").value)
 		.then(response => response.blob())
 		.then(async function(pdf_blob_object) { 
 			// return pdf_blob_object; 
@@ -314,9 +313,8 @@ async function create_an_assistant() {
 	var options = {method : 'POST', headers: headers, body : JSON.stringify(data)};
 	
 	// ------------------------------------------
-	assign_the_task_prompts
-	await assign_the_task_prompts()
-		.then(async function() { return await fetch(url, options); })
+	
+	await fetch(url, options)
 		.then(res => res.json())
 		.then(res => { 
 			let output = JSON.parse(JSON.stringify(res));
@@ -365,8 +363,7 @@ async function create_a_thread() {
 	
 	// ------------------------------------------
 
-	await assign_the_task_prompts()
-		.then(async function() { return await fetch(url, options); })
+	await fetch(url, options)
 	 	.then(response => response.json())
 	 	.then(async function(result) {
 			let output = JSON.parse(JSON.stringify(result));
@@ -401,8 +398,7 @@ async function add_a_message_to_a_thread() {
 	var data = {"role": "user", "content": add_a_message_to_a_thread_content};
 	var options = {method : 'post', headers: headers, body : JSON.stringify(data)};
 
-	await assign_the_task_prompts()
-		.then(async function() { return await fetch(url, options); })
+	await fetch(url, options)
 	 	.then(response => response.json())
 	 	.then(async function(result) {
 			let output = JSON.parse(JSON.stringify(result));
