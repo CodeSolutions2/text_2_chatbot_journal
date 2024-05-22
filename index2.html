@@ -348,7 +348,7 @@ async function consolidate_inputs_to_blob_url() {
 		}
 		
 		if (github_input_radio == true && user_input_radio == false) {
-			await GET_text_from_file_wo_auth_GitHub_RESTAPI()
+			await GET_text_from_file_wo_auth_GitHub_RESTAPI();
 		}
 		
 		if (github_input_radio == false && user_input_radio == false) {
@@ -773,7 +773,7 @@ async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
 
 	var file_objects = [];
 	
-	return await fetch(url)
+	await fetch(url)
 		.then(res => res.json())
 		.then(data => { 
 			data.forEach(async function(file) {
@@ -805,7 +805,6 @@ async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
 		.then(response => response.text())
 		.then(async function(text_out) { 
 			document.getElementById("selected_text").innerHTML = text_out;  // print in text area
-			return text_out;
 		})
 		.catch(error => { console.log(error); });
 }
