@@ -5,11 +5,12 @@
 
 <h1>Text-to-chatbot webapp</h1>
 <ol type="A">
-	<li>Input GitHub repository url to file.</li>
+	<li>Input a desired .txt file: [Option for GitHub] or [Option for user].</li>
+	<li>Input an initial question or request about the content in the desired file.</li>
 	<li>Select method type to create a chatbot: OpenAI Assistant, Q&A finetuning, Q&A finetuning and Vector Similarity.</li>
 	<li>View notification or errors about chatbot creation.</li>
-	<li>View select text from the file.</li>
-	<li>Chat with chatbot about the text in the file.</li>
+	<li>View the desired file.</li>
+	<li>Chat more with chatbot about the text in the file.</li>
 </ol>
 
 <!-- ---------------------------------------- -->
@@ -34,11 +35,12 @@
 <!-- OR -->
 <input type="file" id="upload_file" accept=".txt" style="display:none">
 <br>
-Write a Question or request about the text in the file:
+	
+<h3>[Step 1] Input an initial question or request about the content in the desired file.</h3>
 <input id="prompt" type="text" value="" placeholder="prompt" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
 
 	
-<h3>[Step 1] Select method type to create a chatbot</h3>
+<h3>[Step 2] Select method type to create a chatbot.</h3>
 <select name="chatbot_method_list" id="chatbot_method_list">
 <option value="openai_assistant">OpenAI Assistant</option>
 <option value="q_and_a_finetuning">Q&A finetuning</option>
@@ -49,22 +51,21 @@ Write a Question or request about the text in the file:
 <br>
 <button id="run_selection" onclick="run_selection()">Run Selection</button>
 <br>
-<h3>[Step 2] View notifications and errors</h3>
+<h3>[Step 3] View notification or errors about chatbot creation.</h3>
 <div id="notification"></div>
 <div id="error"></div>
 <br>
-<h3>[Step 3] View Selected text</h3>
+<h3>[Step 4] View the desired file.</h3>
 <textarea id="selected_text" rows="35" cols="100" placeholder="Selected Text" style="display:block" width:100px; height: 200px;></textarea>
 </th>
 
 <!-- ---------------------------------------- -->
-
 <th id="outputs">
-<!-- <h3>[Step 4] Chatbot Area</h3> -->
+<h3 id="qa_ask_chatbot_h3">[Step 5] Chat more with chatbot about the text in the file.</h3>
 <!-- ---------------------------------------- -->
 <!-- View chatbot -->
-<!-- <input id="prompt_input" type="text" value="" placeholder="Ask the chatbot a question about the text" rows="10" cols="100" style="display:block; text-align: left;  height: 50px; width:300px;"><button id="use_chatbot" onclick="use_chatbot()">[Step 4] Ask chatbot</button> -->
-<!-- <table id="chatbot_output" style='text-align: left; width: 300px; display:block'> -->
+<input id="qa_prompt_input" type="text" value="" placeholder="Ask the chatbot more questions about the text/file" rows="10" cols="100" style="display:none; text-align: left;  height: 50px; width:300px;"><button id="qa_with_OpenAI_assistant_model" onclick="qa_with_OpenAI_assistant_model()" style="display:none">[Step 5] Ask chatbot</button>
+<table id="qa_chatbot_output" style='text-align: left; width: 300px; display:none'>
 <!-- dynamically add rows here -->
 </table>
 <!-- ---------------------------------------- -->
@@ -225,7 +226,13 @@ async function run_selection() {
 		// Step D
 		add_a_message_to_a_thread_content = "Read the content of a file respond to the following request: "+prompt+". Format the output concisely with only the response, use the least number of words.";
 	
-		await run_OpenAI_assistant();
+		await run_OpenAI_assistant()
+			.then(async function() { 
+				document.getElementById("qa_ask_chatbot_h3").style.display = "block";
+				document.getElementById("qa_prompt_input").style.display = "block";
+				document.getElementById("qa_with_OpenAI_assistant_model").style.display = "block";
+				document.getElementById("qa_chatbot_output").style.display = "block";
+			});
 		
 	} else if (chatbot_method == 'q_and_a_finetuning') {
 		document.getElementById('error').innerHTML = "Not yet connected: in progress";
@@ -264,6 +271,27 @@ async function run_OpenAI_assistant() {
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 }
 
+
+async function qa_with_OpenAI_assistant_model() {
+
+	var prompt = document.getElementById("qa_prompt_input").value; 
+
+	// Step D
+	add_a_message_to_a_thread_content = "Read the content of a file respond to the following request: "+prompt+". Format the output concisely with only the response, use the least number of words.";
+	
+	// Step D: outputs THREAD_MESSAGE_ID
+	await add_a_message_to_a_thread()
+		// Step E: outputs RUN_ID
+		.then(async function() {  await run_the_assistant(); })
+		// Step F: wait for run to finish
+		.then(async function() { await wait_for_run_to_finish(); })
+		// Step G
+		.then(async function() { await display_the_assistants_response(); })
+		.catch(error => { document.getElementById('error').innerHTML = error; });
+}
+
+
+	
 // ----------------------------------------------------
 // Step 2 : dropdown B (run_QandA_finetuning)
 // ----------------------------------------------------
