@@ -111,16 +111,7 @@ var THREAD_ID = "";
 var THREAD_MESSAGE_ID = "";
 var RUN_ID = "";
 
-let url_split = document.getElementById("file_download_url").value.split("/");
-console.log("url_split:", url_split);
-var desired_filename = url_split.pop();
-var branch_name = url_split.pop();
-var repoName = url_split.pop();
-var repoOwner = url_split.pop();
-console.log("desired_filename:", desired_filename);
-console.log("branch_name:", branch_name);
-console.log("repoName:", repoName);
-console.log("repoOwner:", repoOwner);
+var desired_filename = "";
 	
 var create_an_assistant_assistant_name = "";
 var create_an_assistant_description ="";
@@ -689,6 +680,19 @@ async function display_the_assistants_response() {
 // ----------------------------------------------------
 	
 async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
+
+	let url_split = document.getElementById("file_download_url").value.split("/");
+	console.log("url_split:", url_split);
+	desired_filename = url_split.pop();
+	var branch_name = url_split.pop();
+	var repoName = url_split.pop();
+	var repoOwner = url_split.pop();
+	console.log("desired_filename:", desired_filename);
+	console.log("branch_name:", branch_name);
+	console.log("repoName:", repoName);
+	console.log("repoOwner:", repoOwner);
+
+	// -------------------------------------
 	
 	var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
 
