@@ -6,11 +6,10 @@
 <h1>Text-to-chatbot webapp</h1>
 <ol type="A">
 	<li>Input a desired .txt file: [Option for GitHub] or [Option for user].</li>
-	<li>Input an initial question or request about the content in the desired file.</li>
 	<li>Select method type to create a chatbot: OpenAI Assistant, Q&A finetuning, Q&A finetuning and Vector Similarity.</li>
 	<li>View notification or errors about chatbot creation.</li>
 	<li>View the desired file.</li>
-	<li>Chat more with chatbot about the text in the file.</li>
+	<li>Ask the chatbot questions about the text/file.</li>
 </ol>
 
 <!-- ---------------------------------------- -->
@@ -36,36 +35,32 @@
 <input type="file" id="upload_file" accept=".txt" style="display:none">
 <br>
 	
-<h3>[Step 1] Input an initial question or request about the content in the desired file.</h3>
-<input id="prompt" type="text" value="" placeholder="prompt" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
-
-	
-<h3>[Step 2] Select method type to create a chatbot.</h3>
+<h3>[Step 1] Select method type to create a chatbot.</h3>
 <select name="chatbot_method_list" id="chatbot_method_list">
 <option value="openai_assistant">OpenAI Assistant</option>
 <option value="q_and_a_finetuning">Q&A finetuning</option>
 <option value="q_and_a_finetuning_vec_sim">Q&A finetuning and Vector Similarity</option>
 </select> 
-
 <input id="OPENAI_API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
 <br>
-<button id="run_selection" onclick="run_selection()">Run Selection</button>
-<br>
-<h3>[Step 3] View notification or errors about chatbot creation.</h3>
+
+<h3>[Step 2] View notification or errors about chatbot creation.</h3>
 <div id="notification"></div>
 <div id="error"></div>
+<div id="response"></div>
 <br>
-<h3>[Step 4] View the desired file.</h3>
+
+<h3>[Step 3] View the desired file.</h3>
 <textarea id="selected_text" rows="35" cols="100" placeholder="Selected Text" style="display:block" width:100px; height: 200px;></textarea>
 </th>
 
 <!-- ---------------------------------------- -->
 <th id="outputs">
-<h3 id="qa_ask_chatbot_h3" style="display:none">[Step 5] Chat more with chatbot about the text in the file.</h3>
+<h3 id="qa_ask_chatbot_h3" style="display:block">[Step 4] Ask the chatbot questions about the text/file.</h3>
 <!-- ---------------------------------------- -->
 <!-- View chatbot -->
-<input id="qa_prompt_input" type="text" value="" placeholder="Ask the chatbot more questions about the text/file" rows="10" cols="100" style="display:none; text-align: left;  height: 50px; width:300px;"><button id="qa_with_OpenAI_assistant_model" onclick="qa_with_OpenAI_assistant_model()" style="display:none">[Step 5] Ask chatbot</button>
-<table id="qa_chatbot_output" style='text-align: left; width: 300px; display:none'>
+<input id="" type="text" value="" placeholder="Ask the chatbot questions about the text/file" rows="10" cols="100" style="display:block; text-align: left; height: 50px; width:600px;"><button id="run_selection" onclick="run_selection()">Run Selection</button>
+<table id="chatbot_output" style='text-align: left; width: 300px; display:none'>
 <!-- dynamically add rows here -->
 </table>
 <!-- ---------------------------------------- -->
@@ -93,11 +88,11 @@ div#error { position: relative; color: #bd1f17; }
 
 table {vertical-align: top; border-collapse: collapse; position: relative; z-index: 0; border: 0px solid black;}
 
-tr {vertical-align: top; border: 0px solid black; padding: 10px 10px; }
+tr {vertical-align: top; border: 0px solid black; padding: 10px 20px; }
 
-th, td {vertical-align: top; border: 0px solid black; padding: 10px; }
-th#pdf_viewer_input {width: 100%; }
-th#pdf_viewer_output {width: 100%; }
+th, td {vertical-align: top; border: 0px solid black; padding: 10px 20px; }
+
+input#prompt_input {background-color: #acbdac; border: 0.5px grey; -webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;}
 </style>
 
 	  
@@ -175,7 +170,7 @@ async function previewInput(event) {
 	
 	// Take the first file
 	const file = event.target.files[0];  // first file in the list of selected files, better for selecting multiple files at one time
-	console.log("file :", file);
+	// console.log("file :", file);
 
 	// ---------------------
 
@@ -198,6 +193,7 @@ async function previewInput(event) {
 		document.getElementById('selected_text').innerHTML = binaryString;
 	}
 	reader.readAsDataURL(file);
+	// reader.result contains the data base64_string data
 
 	// ---------------------
 }
@@ -208,31 +204,32 @@ async function previewInput(event) {
 
 async function run_selection() {
 
-	// Get the prompt
 	var chatbot_method = document.getElementById("chatbot_method_list").value;
 
 	if (chatbot_method == 'openai_assistant') {
-		
-		var prompt = document.getElementById("prompt").value; 
-		
+
+		// ----------------------------------------
+		// Define the instructions
+		// ----------------------------------------
 		// Step B
 		create_an_assistant_assistant_name = "give a response using file";
 		create_an_assistant_description = "You are a helpful document content reading and analyzing assistant that responds to content in a file.";
-		create_an_assistant_instructions = "You are a helpful document content reading and analyzing assistant that responds to content in a file concisely, using the least number of words. Read the content of a file and respond to the following question: "+prompt+".";
+		create_an_assistant_instructions = "You are a helpful document content reading and analyzing assistant that responds to content in a file concisely, using the least number of words. Read the content of a file and respond to the following question: "+document.getElementById("prompt").value+".";
 			
 		// Step C
-		create_a_thread_content = "Read the content of a file and respond to the following request: "+prompt+". Format the output concisely with only the response, use the least number of words.";
+		create_a_thread_content = "Read the content of a file and respond to the following request: "+document.getElementById("prompt").value+". Format the output concisely with only the response, use the least number of words.";
 			
 		// Step D
-		add_a_message_to_a_thread_content = "Read the content of a file respond to the following request: "+prompt+". Format the output concisely with only the response, use the least number of words.";
-	
-		await run_OpenAI_assistant()
-			.then(async function() { 
-				document.getElementById("qa_ask_chatbot_h3").style.display = "block";
-				document.getElementById("qa_prompt_input").style.display = "block";
-				document.getElementById("qa_with_OpenAI_assistant_model").style.display = "block";
-				document.getElementById("qa_chatbot_output").style.display = "block";
-			});
+		add_a_message_to_a_thread_content = "Read the content of a file respond to the following request: "+document.getElementById("prompt").value+". Format the output concisely with only the response, use the least number of words.";
+		// ----------------------------------------
+
+		// Need a good way to detect if I already used it 
+		if (document.getElementById("chatbot_output").display == "none") {
+			// The webapp has not been used: run all the steps
+			await run_all_steps_OpenAI_assistant();
+		} else {
+			await run_stepsD_to_G_OpenAI_assistant();
+		}
 		
 	} else if (chatbot_method == 'q_and_a_finetuning') {
 		document.getElementById('error').innerHTML = "Not yet connected: in progress";
@@ -250,7 +247,7 @@ async function run_selection() {
 // ----------------------------------------------------
 // Step 2 : dropdown A
 // ----------------------------------------------------
-async function run_OpenAI_assistant() {
+async function run_all_steps_OpenAI_assistant() {
 
 	// Step AA: outputs text to document.getElementById('selected_text') from a GitHub repository file and it saves the file_download_url 
 	await consolidate_inputs_to_blob_url()
@@ -272,12 +269,10 @@ async function run_OpenAI_assistant() {
 }
 
 
-async function qa_with_OpenAI_assistant_model() {
-
-	var prompt = document.getElementById("qa_prompt_input").value; 
-
+async function run_stepsD_to_G_OpenAI_assistant() {
+	
 	// Step D
-	add_a_message_to_a_thread_content = "Read the content of a file respond to the following request: "+prompt+". Format the output concisely with only the response, use the least number of words.";
+	add_a_message_to_a_thread_content = "Read the content of a file respond to the following request: "+document.getElementById("prompt").value+". Format the output concisely with only the response, use the least number of words.";
 	
 	// Step D: outputs THREAD_MESSAGE_ID
 	await add_a_message_to_a_thread()
@@ -357,10 +352,6 @@ async function consolidate_inputs_to_blob_url() {
 	
 	if (github_input_radio == false && user_input_radio == true) {
 		// text is outputted to document.getElementById('selected_text') with the EventListener
-
-		// see if I can figure out reader better
-		console.log('reader: ', reader);
-		
 		await create_blob_url_for_text_data();
 	}
 	
@@ -688,23 +679,67 @@ async function display_the_assistants_response() {
 	 	.then(async function(result) {
 			let output = JSON.parse(JSON.stringify(result));
 			
-			document.getElementById('notification').innerHTML = "Assistant Response:";
-			document.getElementById('notification').innerHTML += "\n\n";
+			document.getElementById('response').innerHTML = "Assistant Response:";
+			document.getElementById('response').innerHTML += "\n\n";
 			output['data'].forEach(async function(row, index){
 				let text_output = output['data'][index]['content'][0]['text']['value'];
 				if (index == 0) {
-					document.getElementById('notification').innerHTML += text_output;
+					document.getElementById('response').innerHTML += text_output;
+					await print_response_to_frontend();
 				}
 			});
 			
 		})
 		.then(async function() { 
-			document.getElementById('notification').innerHTML += "\n\n";
-			document.getElementById('notification').innerHTML += "STEP G display_the_assistants_response finished."; 
+			document.getElementById('notification').innerHTML = "STEP G display_the_assistants_response finished."; 
 		})
 	 	.catch(error => { document.getElementById('error').innerHTML = error; });
 
 }
+
+
+// ----------------------------------------------------
+
+
+async function print_response_to_frontend() {
+
+	document.getElementById("chatbot_output").style.display = "block";
+	
+	// Print response to Frontend here
+	let tbl = document.getElementById("chatbot_output");
+	let tblBody = document.createElement("tbody");
+	
+	// Add  to Frontend: Create a cellText OR textarea
+	let row = document.createElement("tr");
+	let cell = document.createElement("td");
+	cell.style.backgroundColor = "#cacccf";
+	let cellText = document.createTextNode(`User: ${document.getElementById("").value}`);
+	cell.appendChild(cellText);
+	cell.style.border = "10px solid rgba(0, 0, 0, 0)";
+	row.appendChild(cell);
+	tblBody.appendChild(row);
+	tbl.appendChild(tblBody);
+	
+	// Add chatbot output to Frontend: Create a cellText OR textarea
+	row = document.createElement("tr");
+	cell = document.createElement("td");
+	cell.style.backgroundColor = "#dbc49e";
+	cellText = document.createTextNode(`Chatbot: ${document.getElementById('response').innerHTML}`);
+	cell.appendChild(cellText);
+	cell.style.border = "10px solid rgba(0, 0, 0, 0)";
+	row.appendChild(cell);
+	tblBody.appendChild(row);
+	tbl.appendChild(tblBody);
+	
+}
+
+// ----------------------------------------------------
+
+
+
+
+
+
 	
 // ----------------------------------------------------
 	
