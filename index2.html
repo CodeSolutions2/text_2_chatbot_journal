@@ -215,7 +215,9 @@ async function run_selection() {
 		// ----------------------------------------
 		// Step B
 		create_an_assistant_assistant_name = "give a response using file";
+		
 		create_an_assistant_description = "You are a helpful document content reading and analyzing assistant that responds to content in a file.";
+		
 		create_an_assistant_instructions = "You are a helpful document content reading and analyzing assistant that responds to content in a file concisely, using the least number of words. Read the content of a file and respond to the following question: "+document.getElementById("prompt").value+".";
 			
 		// Step C
@@ -226,7 +228,7 @@ async function run_selection() {
 		// ----------------------------------------
 
 		// Need a good way to detect if I already used it 
-		if (document.getElementById("chatbot_output").display == "none") {
+		if (document.getElementById("chatbot_output").style.display == "none") {
 			// The webapp has not been used: run all the steps
 			await run_all_steps_OpenAI_assistant();
 		} else {
