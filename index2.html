@@ -38,8 +38,8 @@
 <h3>[Step 1] Select method type to create a chatbot.</h3>
 <select name="chatbot_method_list" id="chatbot_method_list">
 <option value="openai_assistant">OpenAI Assistant</option>
-<option value="q_and_a_finetuning">OpenAI Q&A finetuning</option>
-<option value="q_and_a_finetuning_vec_sim">OpenAI Q&A finetuning and Vector Similarity</option>
+<option value="openai_q_and_a_finetuning">OpenAI Q&A finetuning</option>
+<option value="openai_q_and_a_finetuning_vec_sim">OpenAI Q&A finetuning and Vector Similarity</option>
 </select> 
 <input id="OPENAI_API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
 <br>
@@ -91,6 +91,7 @@ div { padding: 10px; display:block; font-family:courier; font-size:15px; height:
 div#notification { position: relative; color: #3236a8; }
 div#error { position: relative; color: #bd1f17; }
 
+div#response { display:none; color: #3236a8; }
 div#output_FILE_ID { display:none; }
 div#output_ASSISTANT_ID { display:none; }
 div#output_THREAD_ID { display:none; }
@@ -105,6 +106,7 @@ th, td {vertical-align: top; border: 0px solid black; padding: 10px 20px; }
 
 input#prompt {background-color: #acbdac; border: 0.5px grey; -webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;}
 </style>
+
 
 	  
 <!-- --------------------------------------------------- -->	  
@@ -235,10 +237,14 @@ async function run_selection() {
 			await run_stepsD_to_G_OpenAI_assistant();
 		}
 		
-	} else if (chatbot_method == 'q_and_a_finetuning') {
-		document.getElementById('error').innerHTML = "Not yet connected: in progress";
-	} else if (chatbot_method == 'q_and_a_finetuning_vec_sim') {
-		document.getElementById('error').innerHTML = "Not yet connected: in progress";
+	} else if (chatbot_method == 'openai_q_and_a_finetuning') {
+		document.getElementById('error').innerHTML = "Not yet organized: in progress";
+		// await run_all_steps_OpenAI_QandA_finetuning();
+		
+	} else if (chatbot_method == 'openai_q_and_a_finetuning_vec_sim') {
+		document.getElementById('error').innerHTML = "Not yet organized: in progress";
+		// await run_all_steps_OpenAI_QandA_finetuning_vector_sim();
+		
 	} else {
 		document.getElementById('error').innerHTML = "No chatbot method selected";
       } 
@@ -295,30 +301,12 @@ async function run_stepsD_to_G_OpenAI_assistant() {
 // Step 2 : dropdown B (run_QandA_finetuning)
 // ----------------------------------------------------
 	
-async function run_QandA_finetuning() {
+async function run_all_steps_OpenAI_QandA_finetuning() {
 	
-	// Read in text data, Display text data in textarea
-	await GET_text_from_file_wo_auth_GitHub_RESTAPI()
-		
-		// Sort text by timestamp
-		.then(async function() {  await sort_text_by_timestamp(transcribed_text) })
-
-		// More steps to add here
-	
-		.then(async function(text_by_date) { 
-			// Processing information
-			outp.innerHTML = 'Processing transcribed text';
-			// readaudio values are delayed becuse of processing with OpenAI endpoint
-			// ----------------------------------------------------
-			// Obtain output
-			// ----------------------------------------------------
-			// [ ***** For debugging Step 3 : do not call model everytime ***** ]
-			// return await create_Q_and_As_from_text(text_by_date); 
-			// OR
-			// Save on using the model: to test other part of the workflow
-			return await step1_text_output();
-			// ----------------------------------------------------
-		})
+	// Step A: outputs text to document.getElementById('selected_text') from a GitHub repository file and it saves the file_download_url 
+	await consolidate_inputs_to_blob_url()
+		// Step B: Sort text by timestamp and organize text into an array containing a dictionary, in chronological time order
+		.then(async function() { await sort_text_by_timestamp(); })
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 }
 
@@ -327,15 +315,12 @@ async function run_QandA_finetuning() {
 // ----------------------------------------------------
 // Step 2 : dropdown C
 // ----------------------------------------------------
-async function run_QandA_finetuning_vector_sim() {
+async function run_all_steps_OpenAI_QandA_finetuning_vector_sim() {
 
-	// Read in text data, Display text data in textarea
-	await GET_text_from_file_wo_auth_GitHub_RESTAPI()
-		// Sort text by timestamp
-		.then(async function() {  await sort_text_by_timestamp(transcribed_text) })
-		
-		// More steps to add here
-		
+	// Step A: outputs text to document.getElementById('selected_text') from a GitHub repository file and it saves the file_download_url 
+	await consolidate_inputs_to_blob_url()
+		// Step B: Sort text by timestamp and organize text into an array containing a dictionary, in chronological time order
+		.then(async function() { await sort_text_by_timestamp(); })
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 }
 
@@ -847,45 +832,11 @@ async function create_blob_url_for_text_data() {
 // ----------------------------------------------------
 // Step 1
 // ----------------------------------------------------
-async function create_Q_and_As_for_finetuning() {
 
-	// -----------------------------------
+async function sort_text_by_timestamp() {
 
-	// Read transcribed data from [transcriptions] 
-	var transcribed_text = outt.innerHTML;
-
-	// Show transcribed data in [Transcribed text] textarea
-	document.getElementById("transcribed_text").innerHTML = transcribed_text;
-	outt.innerHTML = ""; // clear page area, for future collection of text quickly
-
-	// -----------------------------------
-
-	await sort_text_by_timestamp(transcribed_text)
-		.then(async function(text_by_date) { 
-			// Processing information
-			outp.innerHTML = 'Processing transcribed text';
-			// readaudio values are delayed becuse of processing with OpenAI endpoint
-			// ----------------------------------------------------
-			// Obtain output
-			// ----------------------------------------------------
-			// [ ***** For debugging Step 3 : do not call model everytime ***** ]
-			// return await create_Q_and_As_from_text(text_by_date); 
-			// OR
-			// Save on using the model: to test other part of the workflow
-			return await step1_text_output();
-			// ----------------------------------------------------
-		})
-		.then(async function() { await new Promise(r => setTimeout(r, 200)); })
-		// Return a promise to force values created after create_Q_and_As_from_text to be created in sychronous order.
-		// Assure that create_Q_and_As_from_text is finished : ok so create_Q_and_As_from_text returns a little after the callback
-		.then(() => { outp.innerHTML = 'Transcribed Text Processing Done'; })
-
-	// Eventhough there is a promise, values are returned seconds after this function finishes. 
-}
+	let input_text = document.getElementById("selected_text").innerHTML;
 	
-// ----------------------------------------------------
-
-async function sort_text_by_timestamp(input_text) {
 	// Sorting
 	const regexp = /[0-9{4}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+\n/g; // pattern to look for
 	let matches = [...input_text.matchAll(regexp)];
@@ -917,7 +868,8 @@ async function sort_text_by_timestamp(input_text) {
 	// Optional: could sort the Array of dictionaries by date, so it is in chronological order
 	
 	// -----------------------------------
-	
+
+	// An array of dictionary entries by date
 	return text_by_date;
 }
 
