@@ -336,29 +336,26 @@ async function run_all_steps_OpenAI_QandA_finetuning_vector_sim() {
 
 // Step AA
 async function consolidate_inputs_to_blob_url() {
-
-	// if (document.getElementById("input_FILE_ID").value == "") {
 		
-		const github_input_radio = document.getElementById("github_input_radio").checked;
-		const user_input_radio = document.getElementById("user_input_radio").checked;
-		
-		if (github_input_radio == false && user_input_radio == true) {
-			// text is outputted to document.getElementById('selected_text') with the EventListener
-			await create_blob_url_for_text_data();
-		}
-		
-		if (github_input_radio == true && user_input_radio == false) {
-			await GET_text_from_file_wo_auth_GitHub_RESTAPI();
-		}
-		
-		if (github_input_radio == false && user_input_radio == false) {
-			document.getElementById('error').innerHTML += "No input methods are selected. Select a file input method: [Option for GitHub] or [Option for user].";
-		}
+	const github_input_radio = document.getElementById("github_input_radio").checked;
+	const user_input_radio = document.getElementById("user_input_radio").checked;
 	
-		if (github_input_radio == true && user_input_radio == true) {
-			document.getElementById('error').innerHTML += "Both input methods are selected. Select an audio file input method: [Option for GitHub] or [Option for user].";
-		}
-	//}
+	if (github_input_radio == false && user_input_radio == true) {
+		// text is outputted to document.getElementById('selected_text') with the EventListener
+		await create_blob_url_for_text_data();
+	}
+	
+	if (github_input_radio == true && user_input_radio == false) {
+		await GET_text_from_file_wo_auth_GitHub_RESTAPI();
+	}
+	
+	if (github_input_radio == false && user_input_radio == false) {
+		document.getElementById('error').innerHTML += "No input methods are selected. Select a file input method: [Option for GitHub] or [Option for user].";
+	}
+
+	if (github_input_radio == true && user_input_radio == true) {
+		document.getElementById('error').innerHTML += "Both input methods are selected. Select an audio file input method: [Option for GitHub] or [Option for user].";
+	}
 }
 
 // ----------------------------------------------------
