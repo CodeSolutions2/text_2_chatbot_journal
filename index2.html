@@ -137,7 +137,7 @@ async function previewInput(event) {
 		console.log("base64_string:", base64_string);
 
 		// Remove header info (mimeString = "audio/mpeg") because atob can not decode data
-		const regex = /data:text/plain;base64,/g;
+		const regex = /data:text\/plain;base64,/g;
 		base64_string = base64_string.replace(regex, '');
 		console.log("base64_string: ", base64_string);
 
