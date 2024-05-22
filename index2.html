@@ -112,6 +112,7 @@ var THREAD_MESSAGE_ID = "";
 var RUN_ID = "";
 
 var desired_filename = "";
+var reader = {};
 	
 var create_an_assistant_assistant_name = "";
 var create_an_assistant_description ="";
@@ -177,7 +178,7 @@ async function previewInput(event) {
 
 	// ---------------------
 
-	const reader = new FileReader();
+	reader = new FileReader();
 	reader.onload = function(e){
 
 		base64_string = e.target.result;
