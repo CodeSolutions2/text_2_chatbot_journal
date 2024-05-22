@@ -26,7 +26,7 @@
 Write a Question or request about the text in the file:
 <input id="prompt" type="text" value="" placeholder="prompt" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
 
-<input type="file" id="upload_file" accept=".txt" style="display:none">
+<input type="file" id="upload_file" accept=".txt" style="display:block">
 	
 <h3>[Step 1] Select method type to create a chatbot</h3>
 <select name="chatbot_method_list" id="chatbot_method_list">
@@ -191,6 +191,7 @@ var prompt = document.getElementById("prompt").value;
 // ----------------------------------------------------
 async function run_OpenAI_assistant() {
 
+	// Step AA: outputs text to document.getElementById('selected_text')
 	await GET_text_from_file_wo_auth_GitHub_RESTAPI()
 		// Step A: outputs FILE_ID
 		.then(async function() { await upload_files(); })
@@ -272,13 +273,11 @@ async function upload_files() {
 	
 	await fetch(document.getElementById("file_download_url").value)
 		.then(response => response.blob())
-		.then(async function(pdf_blob_object) { 
-			// return pdf_blob_object; 
-			// OR
+		.then(async function(blob_object) { 
 			// Transform blob into a file
-			return new File ([pdf_blob_object], upload_files_filename, {type: "application/pdf"});
+			return new File ([blob_object], upload_files_filename, {type: "application/pdf"});
 		})
-		.then(async function(file_pdf_blob_object) { 
+		.then(async function(file_blob_object) { 
 			const which_input = 'file_blob_object';  // 'blob_object'
 			
 			const url = "https://api.openai.com/v1/files";
@@ -288,10 +287,10 @@ async function upload_files() {
 			const formData = new FormData();
 			if (which_input == 'blob_object') {
 				// WORKS: but filename is 'blob', one can not specifically name the file
-				formData.append("file", file_pdf_blob_object);
+				formData.append("file", file_blob_object);
 			} else {
 				// file_blob_object: specifically name the file
-				formData.append("file", file_pdf_blob_object, upload_files_filename);
+				formData.append("file", file_blob_object, upload_files_filename);
 			}
 			formData.append("purpose", "assistants");
 			const options = {method: 'POST', 
