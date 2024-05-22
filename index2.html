@@ -26,6 +26,8 @@
 Write a Question or request about the text in the file:
 <input id="prompt" type="text" value="" placeholder="prompt" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
 
+<input type="file" id="upload_file" accept=".txt" style="display:none">
+	
 <h3>[Step 1] Select method type to create a chatbot</h3>
 <select name="chatbot_method_list" id="chatbot_method_list">
 <option value="openai_assistant">OpenAI Assistant</option>
@@ -107,6 +109,41 @@ var create_a_thread_content ="";
 var add_a_message_to_a_thread_content = "";
 	
 var month = {"01": "january", "02": "february", "03": "march", "04": "april", "05": "may", "06": "june", "07": "july", "08": "august", "09": "september", "10": "october", "11": "november", "12": "december"};
+
+
+// ----------------------------------------------------
+	
+// The eventlistener needs to be always running, to detect which file the user selected with browse
+document.getElementById("upload_file").addEventListener("change", previewInput, false);
+
+async function previewInput(event) {
+	
+	// ---------------------
+	
+	// console.log("event :", event);
+
+	// ---------------------
+	
+	// Take the first file
+	const file = event.target.files[0];  // first file in the list of selected files, better for selecting multiple files at one time
+	console.log("file :", file);
+	
+	document.getElementById('option1_information').innerHTML = file.name + ',' + event.target.value;
+
+	// ---------------------
+
+	const reader = new FileReader();
+	reader.onload = function(e){
+		console.log("e.target.result :", e.target.result);
+		document.getElementById('selected_text').src = e.target.result;
+	}
+	reader.readAsDataURL(file);
+
+	// ---------------------
+}
+
+
+// ----------------------------------------------------
 
 
 async function run_selection() {
