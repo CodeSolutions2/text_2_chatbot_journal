@@ -299,6 +299,7 @@ async function run_QandA_finetuning() {
 	
 	// Read in text data, Display text data in textarea
 	await GET_text_from_file_wo_auth_GitHub_RESTAPI()
+		
 		// Sort text by timestamp
 		.then(async function() {  await sort_text_by_timestamp(transcribed_text) })
 
@@ -593,7 +594,7 @@ async function run_the_assistant() {
 	// ---------------------------
 	// Run original Assistant instructions
 	// ---------------------------
-	var data = {"assistant_id": ASSISTANT_ID};
+	var data = {"assistant_id": document.getElementById('output_ASSISTANT_ID').innerHTML};
 	// ---------------------------
 	
 	var options = {method : 'POST', headers: headers, body : JSON.stringify(data)};
@@ -764,15 +765,9 @@ async function print_response_to_frontend() {
 	
 }
 
-// ----------------------------------------------------
-
-
-
-
-
-
 	
 // ----------------------------------------------------
+
 	
 async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
 
@@ -843,12 +838,57 @@ async function create_blob_url_for_text_data() {
 	document.getElementById('file_download_url').placeholder = url;
 }
 
+
+
 // ----------------------------------------------------
 
-async function sort_text_by_timestamp(transcribed_text) {
+
+
+// ----------------------------------------------------
+// Step 1
+// ----------------------------------------------------
+async function create_Q_and_As_for_finetuning() {
+
+	// -----------------------------------
+
+	// Read transcribed data from [transcriptions] 
+	var transcribed_text = outt.innerHTML;
+
+	// Show transcribed data in [Transcribed text] textarea
+	document.getElementById("transcribed_text").innerHTML = transcribed_text;
+	outt.innerHTML = ""; // clear page area, for future collection of text quickly
+
+	// -----------------------------------
+
+	await sort_text_by_timestamp(transcribed_text)
+		.then(async function(text_by_date) { 
+			// Processing information
+			outp.innerHTML = 'Processing transcribed text';
+			// readaudio values are delayed becuse of processing with OpenAI endpoint
+			// ----------------------------------------------------
+			// Obtain output
+			// ----------------------------------------------------
+			// [ ***** For debugging Step 3 : do not call model everytime ***** ]
+			// return await create_Q_and_As_from_text(text_by_date); 
+			// OR
+			// Save on using the model: to test other part of the workflow
+			return await step1_text_output();
+			// ----------------------------------------------------
+		})
+		.then(async function() { await new Promise(r => setTimeout(r, 200)); })
+		// Return a promise to force values created after create_Q_and_As_from_text to be created in sychronous order.
+		// Assure that create_Q_and_As_from_text is finished : ok so create_Q_and_As_from_text returns a little after the callback
+		.then(() => { outp.innerHTML = 'Transcribed Text Processing Done'; })
+
+	// Eventhough there is a promise, values are returned seconds after this function finishes. 
+}
+	
+// ----------------------------------------------------
+
+async function sort_text_by_timestamp(input_text) {
 	// Sorting
 	const regexp = /[0-9{4}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+_[0-9{2}]+\n/g; // pattern to look for
-	let matches = [...transcribed_text.matchAll(regexp)];
+	let matches = [...input_text.matchAll(regexp)];
 	// console.log('matches: ', matches);
 	
 	let text_st = 0;
@@ -864,10 +904,10 @@ async function sort_text_by_timestamp(transcribed_text) {
 		if (matches.length > (index+1)){
 			text_end = matches[index+1].index - 1;
 		} else {
-			text_end = transcribed_text.length;
+			text_end = input_text.length;
 		}
 		// console.log('text_st: ', text_st, 'text_end: ', text_end);
-		text_by_date.push({date: date, text: transcribed_text.slice(text_st, text_end)});
+		text_by_date.push({date: date, text: input_text.slice(text_st, text_end)});
 	});
 	
 	console.log('text_by_date: ', text_by_date);
