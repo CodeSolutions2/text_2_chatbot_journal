@@ -38,16 +38,27 @@
 <h3>[Step 1] Select method type to create a chatbot.</h3>
 <select name="chatbot_method_list" id="chatbot_method_list">
 <option value="openai_assistant">OpenAI Assistant</option>
-<option value="q_and_a_finetuning">Q&A finetuning</option>
-<option value="q_and_a_finetuning_vec_sim">Q&A finetuning and Vector Similarity</option>
+<option value="q_and_a_finetuning">OpenAI Q&A finetuning</option>
+<option value="q_and_a_finetuning_vec_sim">OpenAI Q&A finetuning and Vector Similarity</option>
 </select> 
 <input id="OPENAI_API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
 <br>
-
-<h3>[Step 2] View notification or errors about chatbot creation.</h3>
+<h4>(Optional) Input existing OpenAI ID values to reuse existing information.</h4>
+<input id="input_FILE_ID" type="text" value="" placeholder="FILE_ID" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
+<input id="input_ASSISTANT_ID" type="text" value="" placeholder="ASSISTANT_ID" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
+<input id="input_THREAD_ID" type="text" value="" placeholder="THREAD_ID" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
+<input id="input_RUN_ID" type="text" value="" placeholder="RUN_ID" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
+<br>
+	
+<h3>[Step 2] View notification and errors about chatbot creation.</h3>
 <div id="notification"></div>
 <div id="error"></div>
 <div id="response"></div>
+<div id="output_FILE_ID"></div>
+<div id="output_ASSISTANT_ID"></div>
+<div id="output_THREAD_ID"></div>
+<div id="output_THREAD_MESSAGE_ID"></div>
+<div id="output_RUN_ID"></div>
 <br>
 
 <h3>[Step 3] View the desired file.</h3>
@@ -64,12 +75,6 @@
 <!-- dynamically add rows here -->
 </table>
 <!-- ---------------------------------------- -->
-<!-- Text DOM outputs -->
-<div id="output_FILE_ID"></div>
-<div id="output_ASSISTANT_ID"></div>
-<div id="output_THREAD_ID"></div>
-<div id="output_THREAD_MESSAGE_ID"></div>
-<div id="output_RUN_ID"></div>
 </th>
 	
 </tr>
@@ -81,10 +86,16 @@
 <!-- ---------------------------------------- -->
 <!-- CSS -->
 <style>
-div { padding: 10px; display:block; font-family:courier; font-size:15px; height:20px; }
+div { padding: 10px; display:block; font-family:courier; font-size:15px; height:10px; }
 	
 div#notification { position: relative; color: #3236a8; }
 div#error { position: relative; color: #bd1f17; }
+
+div#output_FILE_ID { display:none; }
+div#output_ASSISTANT_ID { display:none; }
+div#output_THREAD_ID { display:none; }
+div#output_THREAD_MESSAGE_ID { display:none; }
+div#output_RUN_ID { display:none; }
 
 table {vertical-align: top; border-collapse: collapse; position: relative; z-index: 0; border: 0px solid black;}
 
@@ -101,12 +112,6 @@ input#prompt {background-color: #acbdac; border: 0.5px grey; -webkit-border-radi
 	  
 <script>
 
-var FILE_ID = "";
-var ASSISTANT_ID = "";
-var THREAD_ID = "";
-var THREAD_MESSAGE_ID = "";
-var RUN_ID = "";
-
 var desired_filename = "";
 var reader = {};
 	
@@ -118,7 +123,10 @@ var add_a_message_to_a_thread_content = "";
 	
 var month = {"01": "january", "02": "february", "03": "march", "04": "april", "05": "may", "06": "june", "07": "july", "08": "august", "09": "september", "10": "october", "11": "november", "12": "december"};
 
-// Initial reloading: reset values
+// ----------------------------------------------------
+	
+// Initial load after page refresh: reset values
+// Need to do for all
 document.getElementById('selected_text').innerHTML = "";
 	
 // ----------------------------------------------------
@@ -164,12 +172,6 @@ document.getElementById("upload_file").addEventListener("change", previewInput, 
 
 async function previewInput(event) {
 	
-	// ---------------------
-	
-	// console.log("event :", event);
-
-	// ---------------------
-	
 	// Take the first file
 	const file = event.target.files[0];  // first file in the list of selected files, better for selecting multiple files at one time
 	// console.log("file :", file);
@@ -196,8 +198,6 @@ async function previewInput(event) {
 	}
 	reader.readAsDataURL(file);
 	// reader.result contains the data base64_string data
-
-	// ---------------------
 }
 
 
@@ -351,24 +351,27 @@ async function run_QandA_finetuning_vector_sim() {
 // Step AA
 async function consolidate_inputs_to_blob_url() {
 
-	const github_input_radio = document.getElementById("github_input_radio").checked;
-	const user_input_radio = document.getElementById("user_input_radio").checked;
+	if (document.getElementById("input_FILE_ID").value == "") {
+		
+		const github_input_radio = document.getElementById("github_input_radio").checked;
+		const user_input_radio = document.getElementById("user_input_radio").checked;
+		
+		if (github_input_radio == false && user_input_radio == true) {
+			// text is outputted to document.getElementById('selected_text') with the EventListener
+			await create_blob_url_for_text_data();
+		}
+		
+		if (github_input_radio == true && user_input_radio == false) {
+			await GET_text_from_file_wo_auth_GitHub_RESTAPI()
+		}
+		
+		if (github_input_radio == false && user_input_radio == false) {
+			document.getElementById('error').innerHTML += "No input methods are selected. Select a file input method: [Option for GitHub] or [Option for user].";
+		}
 	
-	if (github_input_radio == false && user_input_radio == true) {
-		// text is outputted to document.getElementById('selected_text') with the EventListener
-		await create_blob_url_for_text_data();
-	}
-	
-	if (github_input_radio == true && user_input_radio == false) {
-		await GET_text_from_file_wo_auth_GitHub_RESTAPI()
-	}
-	
-	if (github_input_radio == false && user_input_radio == false) {
-		document.getElementById('error').innerHTML += "No input methods are selected. Select a file input method: [Option for GitHub] or [Option for user].";
-	}
-
-	if (github_input_radio == true && user_input_radio == true) {
-		document.getElementById('error').innerHTML += "Both input methods are selected. Select an audio file input method: [Option for GitHub] or [Option for user].";
+		if (github_input_radio == true && user_input_radio == true) {
+			document.getElementById('error').innerHTML += "Both input methods are selected. Select an audio file input method: [Option for GitHub] or [Option for user].";
+		}
 	}
 }
 
@@ -376,44 +379,50 @@ async function consolidate_inputs_to_blob_url() {
 	
 // Step A
 async function upload_files() {
-	
-	await fetch(document.getElementById("file_download_url").value)
-		.then(response => response.blob())
-		.then(async function(blob_object) { 
-			// Transform blob into a file
-			return new File ([blob_object], desired_filename, {type: "application/pdf"});
-		})
-		.then(async function(file_blob_object) { 
-			const which_input = 'file_blob_object';  // 'blob_object'
-			
-			const url = "https://api.openai.com/v1/files";
-			const headers = new Headers();
-			headers.append("Authorization", 'Bearer ' + document.getElementById("OPENAI_API_KEY").value);
-			headers.append("Accept", "application/json");
-			const formData = new FormData();
-			if (which_input == 'blob_object') {
-				// WORKS: but filename is 'blob', one can not specifically name the file
-				formData.append("file", file_blob_object);
-			} else {
-				// file_blob_object: specifically name the file
-				formData.append("file", file_blob_object, desired_filename);
-			}
-			formData.append("purpose", "assistants");
-			const options = {method: 'POST', 
-				       headers: headers, 
-				       body: formData,
-				       redirect: "follow"};
 
-			return await fetch(url, options);
-		})
-	 	.then(response => response.json())
-	 	.then(async function(result) {
-			let output = JSON.parse(JSON.stringify(result));
-			FILE_ID = output['id'];
-			document.getElementById('output_FILE_ID').innerHTML = FILE_ID;
-		})
-		.then(async function() { document.getElementById('notification').innerHTML = "STEP A upload_files finished." })
-	 	.catch(error => { document.getElementById('error').innerHTML = error; });
+	if (document.getElementById("input_FILE_ID").value == "") {
+	
+		await fetch(document.getElementById("file_download_url").value)
+			.then(response => response.blob())
+			.then(async function(blob_object) { 
+				// Transform blob into a file
+				return new File ([blob_object], desired_filename, {type: "application/pdf"});
+			})
+			.then(async function(file_blob_object) { 
+				const which_input = 'file_blob_object';  // 'blob_object'
+				
+				const url = "https://api.openai.com/v1/files";
+				const headers = new Headers();
+				headers.append("Authorization", 'Bearer ' + document.getElementById("OPENAI_API_KEY").value);
+				headers.append("Accept", "application/json");
+				const formData = new FormData();
+				if (which_input == 'blob_object') {
+					// WORKS: but filename is 'blob', one can not specifically name the file
+					formData.append("file", file_blob_object);
+				} else {
+					// file_blob_object: specifically name the file
+					formData.append("file", file_blob_object, desired_filename);
+				}
+				formData.append("purpose", "assistants");
+				const options = {method: 'POST', 
+					       headers: headers, 
+					       body: formData,
+					       redirect: "follow"};
+	
+				return await fetch(url, options);
+			})
+		 	.then(response => response.json())
+		 	.then(async function(result) {
+				let output = JSON.parse(JSON.stringify(result));
+				document.getElementById('output_FILE_ID').innerHTML = output['id'];
+				document.getElementById('input_FILE_ID').value = output['id']; 
+				document.getElementById('input_FILE_ID').placeholder = output['id'];
+			})
+			.then(async function() { document.getElementById('notification').innerHTML = "STEP A upload_files finished." })
+		 	.catch(error => { document.getElementById('error').innerHTML = error; });
+	} else {
+		document.getElementById('output_FILE_ID').innerHTML = document.getElementById("input_FILE_ID").value;
+	}
 }
 
 // ----------------------------------------------------
@@ -421,49 +430,54 @@ async function upload_files() {
 // Step B
 async function create_an_assistant() {
 
-	// ------------------------------------------
-
-	// Retreive needed variables
-	FILE_ID = document.getElementById('output_FILE_ID').innerHTML;
-
-	// ------------------------------------------
-
-	// https://platform.openai.com/docs/api-reference/assistants/createAssistant
+	if (document.getElementById("input_ASSISTANT_ID").value == "") {
+		
+		// ------------------------------------------
 	
-	var url = 'https://api.openai.com/v1/assistants';
-  
-	var headers = {"Content-Type": "application/json", 
-		       "Authorization": 'Bearer ' + document.getElementById("OPENAI_API_KEY").value, 
-		       "OpenAI-Beta": 'assistants=v2'}
-
-	var data = {"model": "gpt-4-turbo",
-		    "name": create_an_assistant_assistant_name, 
-		    "description": create_an_assistant_description, 
-		    "instructions": create_an_assistant_instructions,
-		    "tools": [{"type": "code_interpreter"}],
-		    "tool_resources": {"code_interpreter":{"file_ids": [FILE_ID]}},
-		    "temperature": 0.02,
-		    "top_p": 1
-	};
+		// Retreive needed variables
+		if (document.getElementById('output_FILE_ID').innerHTML == ""){
+			document.getElementById('output_FILE_ID').innerHTML = document.getElementById("input_FILE_ID").value;
+		}
 	
-	// --------------------
+		// ------------------------------------------
 	
-	var options = {method : 'POST', headers: headers, body : JSON.stringify(data)};
+		// https://platform.openai.com/docs/api-reference/assistants/createAssistant
+		
+		var url = 'https://api.openai.com/v1/assistants';
+	  
+		var headers = {"Content-Type": "application/json", 
+			       "Authorization": 'Bearer ' + document.getElementById("OPENAI_API_KEY").value, 
+			       "OpenAI-Beta": 'assistants=v2'}
 	
-	// ------------------------------------------
-	
-	await fetch(url, options)
-		.then(res => res.json())
-		.then(res => { 
-			let output = JSON.parse(JSON.stringify(res));
-			ASSISTANT_ID = output['id'];
-			document.getElementById('output_ASSISTANT_ID').innerHTML = ASSISTANT_ID;
-		})
-		.then(async function() { document.getElementById('notification').innerHTML = "STEP B create_an_assistant finished." })
-		.catch(error => { document.getElementById('error').innerHTML = error; });
+		var data = {"model": "gpt-4-turbo",
+			    "name": create_an_assistant_assistant_name, 
+			    "description": create_an_assistant_description, 
+			    "instructions": create_an_assistant_instructions,
+			    "tools": [{"type": "code_interpreter"}],
+			    "tool_resources": {"code_interpreter":{"file_ids": [document.getElementById('output_FILE_ID').innerHTML]}},
+			    "temperature": 0.02,
+			    "top_p": 1
+		};
+		
+		// --------------------
+		
+		var options = {method : 'POST', headers: headers, body : JSON.stringify(data)};
+		
+		// ------------------------------------------
+		
+		await fetch(url, options)
+			.then(res => res.json())
+			.then(res => { 
+				let output = JSON.parse(JSON.stringify(res));
+				document.getElementById('output_ASSISTANT_ID').innerHTML = output['id'];
+				document.getElementById('input_ASSISTANT_ID').value = output['id'];
+				document.getElementById('input_ASSISTANT_ID').placeholder = output['id'];
+			})
+			.then(async function() { document.getElementById('notification').innerHTML = "STEP B create_an_assistant finished." })
+			.catch(error => { document.getElementById('error').innerHTML = error; });
+	}
   
 }
-
 
 
 // ----------------------------------------------------
@@ -471,43 +485,49 @@ async function create_an_assistant() {
 // Step C
 async function create_a_thread() {
 
-	// ------------------------------------------
-
-	// Retreive needed variables
-	FILE_ID = document.getElementById('output_FILE_ID').innerHTML;
-
-	// ------------------------------------------
+	if (document.getElementById("input_THREAD_ID").value == "") {
+		
+		// ------------------------------------------
 	
-	const url = "https://api.openai.com/v1/threads";
-	var headers = {"Content-Type": "application/json", 
-		       "Authorization": 'Bearer ' + document.getElementById("OPENAI_API_KEY").value, 
-		       "OpenAI-Beta": 'assistants=v2'}
-
-	// ---------------------------
-
-	// File search enables the assistant with knowledge from files that you or your users upload. Once a file is uploaded, the assistant automatically decides when to retrieve content based on user requests.
+		// Retreive needed variables
+		if (document.getElementById('output_FILE_ID').innerHTML == ""){
+			document.getElementById('output_FILE_ID').innerHTML = document.getElementById("input_FILE_ID").value;
+		}
 	
-	// Code Interpreter enables the assistant to write and run code. This tool can process files with diverse data and formatting, and generate files such as graphs.
+		// ------------------------------------------
+		
+		const url = "https://api.openai.com/v1/threads";
+		var headers = {"Content-Type": "application/json", 
+			       "Authorization": 'Bearer ' + document.getElementById("OPENAI_API_KEY").value, 
+			       "OpenAI-Beta": 'assistants=v2'}
 	
-	// --------------------
-	// Instructions on https://platform.openai.com/docs/assistants/how-it-works/managing-threads-and-messages?lang=python
-	var messages = [{"role": "user", "content": create_a_thread_content, "attachments": [{"file_id": FILE_ID, "tools": [{"type": "code_interpreter"}]}]}];
+		// ---------------------------
 	
-	var data = {"messages": messages};
+		// File search enables the assistant with knowledge from files that you or your users upload. Once a file is uploaded, the assistant automatically decides when to retrieve content based on user requests.
+		
+		// Code Interpreter enables the assistant to write and run code. This tool can process files with diverse data and formatting, and generate files such as graphs.
+		
+		// --------------------
+		// Instructions on https://platform.openai.com/docs/assistants/how-it-works/managing-threads-and-messages?lang=python
+		var messages = [{"role": "user", "content": create_a_thread_content, "attachments": [{"file_id": document.getElementById('output_FILE_ID').innerHTML, "tools": [{"type": "code_interpreter"}]}]}];
+		
+		var data = {"messages": messages};
+		
+		var options = {method : 'POST', headers: headers, body : JSON.stringify(data)};
+		
+		// ------------------------------------------
 	
-	var options = {method : 'POST', headers: headers, body : JSON.stringify(data)};
-	
-	// ------------------------------------------
-
-	await fetch(url, options)
-	 	.then(response => response.json())
-	 	.then(async function(result) {
-			let output = JSON.parse(JSON.stringify(result));
-			THREAD_ID = output['id'];
-			document.getElementById('output_THREAD_ID').innerHTML = THREAD_ID;
-		})
-		.then(async function() { document.getElementById('notification').innerHTML = "STEP C create_a_thread finished." })
-	 	.catch(error => { document.getElementById('error').innerHTML = error; });
+		await fetch(url, options)
+		 	.then(response => response.json())
+		 	.then(async function(result) {
+				let output = JSON.parse(JSON.stringify(result));
+				document.getElementById('output_THREAD_ID').innerHTML = output['id'];
+				document.getElementById('input_THREAD_ID').value = output['id'];
+				document.getElementById('input_THREAD_ID').placeholder = output['id'];
+			})
+			.then(async function() { document.getElementById('notification').innerHTML = "STEP C create_a_thread finished." })
+		 	.catch(error => { document.getElementById('error').innerHTML = error; });
+	}
 	
 }
 	
@@ -515,16 +535,17 @@ async function create_a_thread() {
 
 // Step D
 async function add_a_message_to_a_thread() {
-
+	
 	// ------------------------------------------
 
   	// Retreive needed variables
-	
-	THREAD_ID = document.getElementById('output_THREAD_ID').innerHTML;
+	if (document.getElementById('output_THREAD_ID').innerHTML == ""){
+		document.getElementById('output_THREAD_ID').innerHTML = document.getElementById("input_THREAD_ID").value;
+	}
 
 	// ------------------------------------------
 	
-	const url = "https://api.openai.com/v1/threads/"+THREAD_ID+"/messages";
+	const url = "https://api.openai.com/v1/threads/"+document.getElementById('output_THREAD_ID').innerHTML+"/messages";
 	var headers = {"Content-Type": "application/json", 
 		       "Authorization": 'Bearer ' + document.getElementById("OPENAI_API_KEY").value, 
 		       "OpenAI-Beta": 'assistants=v2'};
@@ -536,8 +557,7 @@ async function add_a_message_to_a_thread() {
 	 	.then(response => response.json())
 	 	.then(async function(result) {
 			let output = JSON.parse(JSON.stringify(result));
-			THREAD_MESSAGE_ID = output['id'];
-			document.getElementById('output_THREAD_MESSAGE_ID').innerHTML = THREAD_MESSAGE_ID;
+			document.getElementById('output_THREAD_MESSAGE_ID').innerHTML = output['id'];
 		})
 		.then(async function() { document.getElementById('notification').innerHTML = "STEP D add_a_message_to_a_thread finished." })
 	 	.catch(error => { document.getElementById('error').innerHTML = error; });
@@ -551,17 +571,21 @@ async function run_the_assistant() {
 	// ------------------------------------------
 
 	// Retreive needed variables
-	THREAD_ID = document.getElementById('output_THREAD_ID').innerHTML;
+	if (document.getElementById('output_THREAD_ID').innerHTML == ""){
+		document.getElementById('output_THREAD_ID').innerHTML = document.getElementById("input_THREAD_ID").value;
+	}
 
   	// Retreive needed variables
-	ASSISTANT_ID = document.getElementById('output_ASSISTANT_ID').innerHTML;
+	if (document.getElementById('output_ASSISTANT_ID').innerHTML == ""){
+		document.getElementById('output_ASSISTANT_ID').innerHTML = document.getElementById("input_ASSISTANT_ID").value;
+	}
 
 	// ------------------------------------------
 	
 	// Create a run such that the assistant reads the thread and decides whether to call tools or use a model to respond to the query.
 	// https://platform.openai.com/docs/api-reference/runs/createRun
 	
-	const url = "https://api.openai.com/v1/threads/"+THREAD_ID+"/runs";
+	const url = "https://api.openai.com/v1/threads/"+document.getElementById('output_THREAD_ID').innerHTML+"/runs";
 	var headers = {"Content-Type": "application/json", 
 		       "Authorization": 'Bearer ' + document.getElementById("OPENAI_API_KEY").value, 
 		       "OpenAI-Beta": 'assistants=v2'};
@@ -578,14 +602,12 @@ async function run_the_assistant() {
 	 	.then(response => response.json())
 	 	.then(async function(result) {
 			let output = JSON.parse(JSON.stringify(result));
-			RUN_ID = output['id'];
-			document.getElementById('output_RUN_ID').innerHTML = RUN_ID;
+			document.getElementById('output_RUN_ID').innerHTML = output['id'];
+			document.getElementById('input_RUN_ID').value = output['id'];
+			document.getElementById('input_RUN_ID').placeholder = output['id'];
 		})
 		.then(async function() { document.getElementById('notification').innerHTML = "STEP E run_the_assistant finished." })
 	 	.catch(error => { document.getElementById('error').innerHTML = error; });
-
-	// Output contains
-	// assistant_id, id (which is RUN_ID), instructions, model, status: "queued", temperature, thread_id, tool_choice: "auto", tools: {type: "code_interpreter"}, top_p: 1, truncation_strategy: {type: "auto", last_messages: null}
 	
 }
 
@@ -598,18 +620,21 @@ async function check_the_run_status() {
 	// ------------------------------------------
 
 	// Retreive needed variables
-	THREAD_ID = document.getElementById('output_THREAD_ID').innerHTML;
+	if (document.getElementById('output_THREAD_ID').innerHTML == ""){
+		document.getElementById('output_THREAD_ID').innerHTML = document.getElementById("input_THREAD_ID").value;
+	}
 
 	// Retreive needed variables
-	RUN_ID = document.getElementById('output_RUN_ID').innerHTML;
+	if (document.getElementById('output_RUN_ID').innerHTML == ""){
+		document.getElementById('output_RUN_ID').innerHTML = document.getElementById("input_RUN_ID").value;
+	}
 
 
 	// ------------------------------------------
 
 	// https://platform.openai.com/docs/api-reference/runs/getRun
-	// GET https://api.openai.com/v1/threads/{thread_id}/runs/{run_id}
 	
-	const url = "https://api.openai.com/v1/threads/"+THREAD_ID+"/runs/"+RUN_ID;
+	const url = "https://api.openai.com/v1/threads/"+document.getElementById('output_THREAD_ID').innerHTML+"/runs/"+document.getElementById('output_RUN_ID').innerHTML;
 	var headers = {"Authorization": 'Bearer ' + document.getElementById("OPENAI_API_KEY").value, 
 		       "OpenAI-Beta": 'assistants=v2'};
 	var options = {method : 'GET', headers: headers};
@@ -665,14 +690,16 @@ async function display_the_assistants_response() {
 	// ------------------------------------------
 
 	// Retreive needed variables
-	THREAD_ID = document.getElementById('output_THREAD_ID').innerHTML;
+	if (document.getElementById('output_THREAD_ID').innerHTML == ""){
+		document.getElementById('output_THREAD_ID').innerHTML = document.getElementById("input_THREAD_ID").value;
+	}
 
 	// ------------------------------------------
 	
 	// https://platform.openai.com/docs/api-reference/messages/listMessages?lang=curl
 	// List messages: GET https://api.openai.com/v1/threads/{thread_id}/messages
 	
-	const url = "https://api.openai.com/v1/threads/"+THREAD_ID+"/messages";
+	const url = "https://api.openai.com/v1/threads/"+document.getElementById('output_THREAD_ID').innerHTML+"/messages";
 	var headers = {"Content-Type": "application/json", 
 		       "Authorization": 'Bearer ' + document.getElementById("OPENAI_API_KEY").value, 
 		       "OpenAI-Beta": 'assistants=v2'};
