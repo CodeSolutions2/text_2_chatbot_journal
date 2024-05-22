@@ -22,11 +22,21 @@
 <h1></h1>
 
 <h3>[Step 0] Input GitHub repository url to file to include in the analysis (ie: https://raw.githubusercontent.com/CodeSolutions2/text_2_chatbot_journal/main/journal_data.txt).</h3>
-<input id="file_download_url" type="text" value="" placeholder="file_download_url" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
+
+<fieldset>
+<input type="radio" id="github_input_radio" name="radio_name" value="github_input_radio" />
+<label for="github_input_radio_label">Option for GitHub</label>
+<br>
+<input type="radio" id="user_input_radio" name="radio_name" value="user_input_radio" />
+<label for="user_input_radio_label">Option for user</label>
+</fieldset>
+<input id="file_download_url" type="text" value="" placeholder="file_download_url" rows="10" cols="100" style="display:none; text-align: left; width: 600px;">
+<!-- OR -->
+<input type="file" id="upload_file" accept=".txt" style="display:none">
+<br>
 Write a Question or request about the text in the file:
 <input id="prompt" type="text" value="" placeholder="prompt" rows="10" cols="100" style="display:block; text-align: left; width: 600px;">
 
-<input type="file" id="upload_file" accept=".txt" style="display:block">
 	
 <h3>[Step 1] Select method type to create a chatbot</h3>
 <select name="chatbot_method_list" id="chatbot_method_list">
@@ -101,7 +111,17 @@ var THREAD_ID = "";
 var THREAD_MESSAGE_ID = "";
 var RUN_ID = "";
 
-var upload_files_filename = "";
+let url_split = document.getElementById("file_download_url").value.split("/");
+console.log("url_split:", url_split);
+var desired_filename = url_split.pop();
+var branch_name = url_split.pop();
+var repoName = url_split.pop();
+var repoOwner = url_split.pop();
+console.log("desired_filename:", desired_filename);
+console.log("branch_name:", branch_name);
+console.log("repoName:", repoName);
+console.log("repoOwner:", repoOwner);
+	
 var create_an_assistant_assistant_name = "";
 var create_an_assistant_description ="";
 var create_an_assistant_instructions = "";
@@ -110,6 +130,42 @@ var add_a_message_to_a_thread_content = "";
 	
 var month = {"01": "january", "02": "february", "03": "march", "04": "april", "05": "may", "06": "june", "07": "july", "08": "august", "09": "september", "10": "october", "11": "november", "12": "december"};
 
+
+// ----------------------------------------------------
+
+	
+document.getElementById("github_input_radio").addEventListener("click", processEvent_github_input, false);
+document.getElementById("user_input_radio").addEventListener("click", processEvent_user_input, false);
+
+async function processEvent_github_input(event) {
+	
+	if (this.getAttribute("checked") == false) {
+		// Make all buttons non-visible to reset
+		document.getElementById("file_download_url").style.display = "none";
+		document.getElementById("upload_file").style.display = "none";
+	} else  {
+		// If repo button checked, make repo all buttons visible
+		document.getElementById("file_download_url").style.display = "block";
+		
+		// and other buttons non-visible
+		document.getElementById("upload_file").style.display = "none";
+	}
+}
+	
+async function processEvent_user_input(event) {
+
+	if (this.getAttribute("checked") == false) {
+		// Make all buttons non-visible to reset
+		document.getElementById("file_download_url").style.display = "none";
+		document.getElementById("upload_file").style.display = "none";
+	} else  {
+		// If option1 button checked, make option1 all buttons visible
+		document.getElementById("upload_file").style.display = "block";
+
+		// and other buttons non-visible
+		document.getElementById("file_download_url").style.display = "none";
+	}
+}
 
 // ----------------------------------------------------
 	
@@ -134,20 +190,19 @@ async function previewInput(event) {
 	reader.onload = function(e){
 
 		base64_string = e.target.result;
-		console.log("base64_string:", base64_string);
+		// console.log("base64_string:", base64_string);
 
 		// Remove header info (mimeString = "audio/mpeg") because atob can not decode data
 		const regex = /data:text\/plain;base64,/g;
 		base64_string = base64_string.replace(regex, '');
-		console.log("base64_string: ", base64_string);
+		// console.log("base64_string: ", base64_string);
 
 		// Thinking that this should be the text information
 		// Decode the Base64-encoded string --> obtain the text data in binary string format
 		const binaryString = atob(base64_string);
-		console.log("binaryString: ", binaryString);
-
+		// console.log("binaryString: ", binaryString);
 		
-		document.getElementById('selected_text').src = binaryString;
+		document.getElementById('selected_text').innerHTML = binaryString;
 	}
 	reader.readAsDataURL(file);
 
@@ -160,31 +215,26 @@ async function previewInput(event) {
 
 async function run_selection() {
 
-
 	// Get the prompt
 	var chatbot_method = document.getElementById("chatbot_method_list").value;
 
 	if (chatbot_method == 'openai_assistant') {
-		// Step A
-		upload_files_filename = document.getElementById("file_download_url").value.split("/").pop();
-		console.log("upload_files_filename: ", upload_files_filename);
-
-		// ------------------------
-
-var prompt = document.getElementById("prompt").value; 
-	      
-	// Step B
-	create_an_assistant_assistant_name = "give a response using file";
-	create_an_assistant_description = "You are a helpful document content reading and analyzing assistant that responds to content in a file.";
-	create_an_assistant_instructions = "You are a helpful document content reading and analyzing assistant that responds to content in a file concisely, using the least number of words. Read the content of a file and respond to the following question: "+prompt+".";
 		
-	// Step C
-	create_a_thread_content = "Read the content of a file and respond to the following request: "+prompt+". Format the output concisely with only the response, use the least number of words.";
+		var prompt = document.getElementById("prompt").value; 
 		
-	// Step D
-	add_a_message_to_a_thread_content = "Read the content of a file respond to the following request: "+prompt+". Format the output concisely with only the response, use the least number of words.";
+		// Step B
+		create_an_assistant_assistant_name = "give a response using file";
+		create_an_assistant_description = "You are a helpful document content reading and analyzing assistant that responds to content in a file.";
+		create_an_assistant_instructions = "You are a helpful document content reading and analyzing assistant that responds to content in a file concisely, using the least number of words. Read the content of a file and respond to the following question: "+prompt+".";
+			
+		// Step C
+		create_a_thread_content = "Read the content of a file and respond to the following request: "+prompt+". Format the output concisely with only the response, use the least number of words.";
+			
+		// Step D
+		add_a_message_to_a_thread_content = "Read the content of a file respond to the following request: "+prompt+". Format the output concisely with only the response, use the least number of words.";
 	
 		await run_OpenAI_assistant();
+		
 	} else if (chatbot_method == 'q_and_a_finetuning') {
 		document.getElementById('error').innerHTML = "Not yet connected: in progress";
 	} else if (chatbot_method == 'q_and_a_finetuning_vec_sim') {
@@ -203,8 +253,8 @@ var prompt = document.getElementById("prompt").value;
 // ----------------------------------------------------
 async function run_OpenAI_assistant() {
 
-	// Step AA: outputs text to document.getElementById('selected_text')
-	await GET_text_from_file_wo_auth_GitHub_RESTAPI()
+	// Step AA: outputs text to document.getElementById('selected_text') from a GitHub repository file and it saves the file_download_url 
+	await consolidate_inputs_to_blob_url()
 		// Step A: outputs FILE_ID
 		.then(async function() { await upload_files(); })
 		// Step B: outputs ASSISTANT_ID
@@ -278,8 +328,37 @@ async function run_QandA_finetuning_vector_sim() {
 // ----------------------------------------------------
 // SUBFUNCTIONS
 // ----------------------------------------------------
-// ----------------------------------------------------
 
+// Step AA
+async function consolidate_inputs_to_blob_url() {
+
+	const github_input_radio = document.getElementById("github_input_radio").checked;
+	const user_input_radio = document.getElementById("user_input_radio").checked;
+	
+	if (github_input_radio == false && user_input_radio == true) {
+		// text is outputted to document.getElementById('selected_text') with the EventListener
+
+		// see if I can figure out reader better
+		console.log('reader: ', reader);
+		
+		await create_blob_url_for_text_data();
+	}
+	
+	if (github_input_radio == true && user_input_radio == false) {
+		await GET_text_from_file_wo_auth_GitHub_RESTAPI()
+	}
+	
+	if (github_input_radio == false && user_input_radio == false) {
+		document.getElementById('error').innerHTML += "No input methods are selected. Select a file input method: [Option for GitHub] or [Option for user].";
+	}
+
+	if (github_input_radio == true && user_input_radio == true) {
+		document.getElementById('error').innerHTML += "Both input methods are selected. Select an audio file input method: [Option for GitHub] or [Option for user].";
+	}
+}
+
+// ----------------------------------------------------
+	
 // Step A
 async function upload_files() {
 	
@@ -287,7 +366,7 @@ async function upload_files() {
 		.then(response => response.blob())
 		.then(async function(blob_object) { 
 			// Transform blob into a file
-			return new File ([blob_object], upload_files_filename, {type: "application/pdf"});
+			return new File ([blob_object], desired_filename, {type: "application/pdf"});
 		})
 		.then(async function(file_blob_object) { 
 			const which_input = 'file_blob_object';  // 'blob_object'
@@ -302,7 +381,7 @@ async function upload_files() {
 				formData.append("file", file_blob_object);
 			} else {
 				// file_blob_object: specifically name the file
-				formData.append("file", file_blob_object, upload_files_filename);
+				formData.append("file", file_blob_object, desired_filename);
 			}
 			formData.append("purpose", "assistants");
 			const options = {method: 'POST', 
@@ -610,9 +689,6 @@ async function display_the_assistants_response() {
 // ----------------------------------------------------
 	
 async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
-
-	var repoOwner = 'CodeSolutions2';
-	var repoName = 'text_2_chatbot_journal';
 	
 	var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
 
@@ -622,7 +698,7 @@ async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
 		.then(res => res.json())
 		.then(data => { 
 			data.forEach(async function(file) {
-				var regexp = new RegExp(`${upload_files_filename}`, 'g');
+				var regexp = new RegExp(`${desired_filename}`, 'g');
 				if (file.type === 'file' && file.name.match(regexp)) {
 					file_objects.push(file);
 				}
@@ -634,6 +710,8 @@ async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
 			console.log("file_object: ", file_object)
 		   
 			var file_download_url = file_object.download_url;
+			document.getElementById("file_download_url").value = file_download_url;
+			document.getElementById('file_download_url').placeholder = file_download_url;
 			console.log("file_download_url:", file_download_url);
 		   
 			sha_val = file_object.sha;
@@ -653,6 +731,20 @@ async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
 		.catch(error => { console.log(error); });
 }
 
+// ----------------------------------------------------
+
+async function create_blob_url_for_text_data() {
+	
+	// Put the text data in a temporary blob file, and create a url to the data
+	const blob = new Blob([document.getElementById('selected_text').innerHTML], { type: 'text/csv;charset=utf-8;' });
+	
+	// Create a url for the data object
+	const url = URL.createObjectURL(blob);
+	document.getElementById("file_download_url").value = url;
+	document.getElementById('file_download_url').placeholder = url;
+}
+
+// ----------------------------------------------------
 
 async function sort_text_by_timestamp(transcribed_text) {
 	// Sorting
