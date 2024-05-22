@@ -132,8 +132,22 @@ async function previewInput(event) {
 
 	const reader = new FileReader();
 	reader.onload = function(e){
-		console.log("e.target.result :", e.target.result);
-		document.getElementById('selected_text').src = e.target.result;
+
+		base64_string = e.target.result;
+		console.log("base64_string:", base64_string);
+
+		// Remove header info (mimeString = "audio/mpeg") because atob can not decode data
+		const regex = /data:text/plain;base64,/g;
+		base64_string = base64_string.replace(regex, '');
+		console.log("base64_string: ", base64_string);
+
+		// Thinking that this should be the text information
+		// Decode the Base64-encoded string --> obtain the text data in binary string format
+		const binaryString = atob(base64_string);
+		console.log("binaryString: ", binaryString);
+
+		
+		document.getElementById('selected_text').src = binaryString;
 	}
 	reader.readAsDataURL(file);
 
