@@ -238,7 +238,7 @@ async function run_selection() {
 		}
 		
 	} else if (chatbot_method == 'openai_q_and_a_finetuning') {
-		// document.getElementById('error').innerHTML = "Not yet organized: in progress";
+		document.getElementById('error').innerHTML = "Not yet organized: in progress";
 		await run_all_steps_OpenAI_QandA_finetuning();
 		
 	} else if (chatbot_method == 'openai_q_and_a_finetuning_vec_sim') {
