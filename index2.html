@@ -118,7 +118,9 @@ var add_a_message_to_a_thread_content = "";
 	
 var month = {"01": "january", "02": "february", "03": "march", "04": "april", "05": "may", "06": "june", "07": "july", "08": "august", "09": "september", "10": "october", "11": "november", "12": "december"};
 
-
+// Initial reloading: reset values
+document.getElementById('selected_text').innerHTML = "";
+	
 // ----------------------------------------------------
 
 	
@@ -709,7 +711,7 @@ async function print_response_to_frontend() {
 	let tbl = document.getElementById("chatbot_output");
 	let tblBody = document.createElement("tbody");
 	
-	// Add  to Frontend: Create a cellText OR textarea
+	// Add to Frontend: Create a cellText OR textarea
 	let row = document.createElement("tr");
 	let cell = document.createElement("td");
 	cell.style.backgroundColor = "#cacccf";
