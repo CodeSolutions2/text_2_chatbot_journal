@@ -717,7 +717,7 @@ async function print_response_to_frontend() {
 	let row = document.createElement("tr");
 	let cell = document.createElement("td");
 	cell.style.backgroundColor = "#cacccf";
-	let cellText = document.createTextNode(`User: ${document.getElementById("").value}`);
+	let cellText = document.createTextNode(`User: ${document.getElementById("prompt").value}`);
 	cell.appendChild(cellText);
 	cell.style.border = "10px solid rgba(0, 0, 0, 0)";
 	row.appendChild(cell);
