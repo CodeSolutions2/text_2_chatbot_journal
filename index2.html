@@ -30,7 +30,6 @@
 <select name="chatbot_method_list" id="chatbot_method_list">
 <option value="openai_assistant">OpenAI Assistant</option>
 <option value="openai_q_and_a_finetuning">OpenAI Q&A finetuning</option>
-<option value="openai_q_and_a_finetuning_vec_sim">OpenAI Q&A finetuning and Vector Similarity</option>
 </select> 
 <input id="OPENAI_API_KEY" type="text" value="" placeholder="OPENAI_API_KEY" rows="10" cols="100" style="display:block; text-align: left; width: 150px;">
 <br>
@@ -196,10 +195,6 @@ async function run_selection() {
 		document.getElementById('error').innerHTML = "Not yet organized: in progress";
 		await run_all_steps_OpenAI_QandA_finetuning();
 		
-	} else if (chatbot_method == 'openai_q_and_a_finetuning_vec_sim') {
-		document.getElementById('error').innerHTML = "Not yet organized: in progress";
-		// await run_all_steps_OpenAI_QandA_finetuning_vector_sim();
-		
 	} else {
 		document.getElementById('error').innerHTML = "No chatbot method selected";
       } 
@@ -252,32 +247,25 @@ async function run_stepsD_to_G_OpenAI_assistant() {
 
 	
 // ----------------------------------------------------
-// Step 2 : dropdown B (run_QandA_finetuning)
+// Step 2 : dropdown B
 // ----------------------------------------------------
-	
 async function run_all_steps_OpenAI_QandA_finetuning() {
 	
 	await create_blob_url_for_text_data()
 		// Step B: Sort text by timestamp and organize text into an array containing a dictionary, in chronological time order
 		.then(async function() { await sort_text_by_timestamp(); })
+		// Step C: Create Questions and Answers  for each dictionary entry
+		.then(async function(array_dict_text_by_date) {  await create_Q_and_As_from_text(array_dict_text_by_date);  })
+		// Step D: Upload Finetuning csv file: outputs FILE_ID 
+		.then(async function() { await prepare_fine_tune_textfile(); })
+		// Step E: Use FILE_ID to finetune a GPT model
+		.then(async function() { await openai_finetune_a_model(); })
+		// Step F: Wait to be notified when finetunning is finished
+		.then(async function() { await wait_for_finetuning_to_finish(); })
+		// Step G: Use the finetuned model
+		.then(async function() { await openai_use_finetunned_model(); })
 		.catch(error => { document.getElementById('error').innerHTML = error; });
 }
-
-
-
-// ----------------------------------------------------
-// Step 2 : dropdown C
-// ----------------------------------------------------
-async function run_all_steps_OpenAI_QandA_finetuning_vector_sim() {
-	
-	await create_blob_url_for_text_data()
-		// Step B: Sort text by timestamp and organize text into an array containing a dictionary, in chronological time order
-		.then(async function() { await sort_text_by_timestamp(); })
-		.catch(error => { document.getElementById('error').innerHTML = error; });
-}
-
-
-
 
 
 
