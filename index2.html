@@ -295,7 +295,6 @@ async function create_blob_url_for_text_data() {
 	const url = URL.createObjectURL(blob);
 	document.getElementById("file_download_url").value = url;
 	document.getElementById('file_download_url').placeholder = url;
-	console.log('create_blob_url_for_text_data')
 }
 
 // ----------------------------------------------------
@@ -346,7 +345,6 @@ async function upload_files() {
 	} else {
 		document.getElementById('output_FILE_ID').innerHTML = document.getElementById("input_FILE_ID").value;
 	}
-	console.log('upload_files')
 }
 
 // ----------------------------------------------------
@@ -400,7 +398,6 @@ async function create_an_assistant() {
 			.then(async function() { document.getElementById('notification').innerHTML = "STEP B create_an_assistant finished." })
 			.catch(error => { document.getElementById('error').innerHTML = error; });
 	}
-	console.log('create_an_assistant')
 }
 
 
@@ -452,7 +449,6 @@ async function create_a_thread() {
 			.then(async function() { document.getElementById('notification').innerHTML = "STEP C create_a_thread finished." })
 		 	.catch(error => { document.getElementById('error').innerHTML = error; });
 	}
-	console.log('create_a_thread')
 	
 }
 	
@@ -486,8 +482,6 @@ async function add_a_message_to_a_thread() {
 		})
 		.then(async function() { document.getElementById('notification').innerHTML = "STEP D add_a_message_to_a_thread finished." })
 	 	.catch(error => { document.getElementById('error').innerHTML = error; });
-
-	console.log('create_a_thread')
 }
 
 // ----------------------------------------------------
