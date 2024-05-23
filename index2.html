@@ -5,7 +5,7 @@
 
 <h1>Text-to-chatbot webapp</h1>
 <ol type="A">
-	<li>Input a desired .txt file: [Option for GitHub] or [Option for user].</li>
+	<li>Input a desired .txt file: [Option for user].</li>
 	<li>Select method type to create a chatbot: OpenAI Assistant, Q&A finetuning, Q&A finetuning and Vector Similarity.</li>
 	<li>View notification or errors about chatbot creation.</li>
 	<li>View the desired file.</li>
@@ -21,18 +21,8 @@
 <th id="inputs">
 <h1></h1>
 
-<h3>[Step 0] Input GitHub repository url to file to include in the analysis (ie: https://raw.githubusercontent.com/CodeSolutions2/text_2_chatbot_journal/main/journal_data.txt).</h3>
-
-<fieldset>
-<input type="radio" id="github_input_radio" name="radio_name" value="github_input_radio" />
-<label for="github_input_radio_label">Option for GitHub</label>
-<br>
-<input type="radio" id="user_input_radio" name="radio_name" value="user_input_radio" />
-<label for="user_input_radio_label">Option for user</label>
-</fieldset>
-<input id="file_download_url" type="text" value="" placeholder="file_download_url" rows="10" cols="100" style="display:none; text-align: left; width: 600px;">
-<!-- OR -->
-<input type="file" id="upload_file" accept=".txt" style="display:none">
+<h3>[Step 0] Input a file to include in the analysis.</h3>
+<input type="file" id="upload_file" accept=".txt" style="display:block">
 <br>
 	
 <h3>[Step 1] Select method type to create a chatbot.</h3>
@@ -132,42 +122,6 @@ var month = {"01": "january", "02": "february", "03": "march", "04": "april", "0
 document.getElementById('selected_text').innerHTML = "";
 	
 // ----------------------------------------------------
-
-	
-document.getElementById("github_input_radio").addEventListener("click", processEvent_github_input, false);
-document.getElementById("user_input_radio").addEventListener("click", processEvent_user_input, false);
-
-async function processEvent_github_input(event) {
-	
-	if (this.getAttribute("checked") == false) {
-		// Make all buttons non-visible to reset
-		document.getElementById("file_download_url").style.display = "none";
-		document.getElementById("upload_file").style.display = "none";
-	} else  {
-		// If repo button checked, make repo all buttons visible
-		document.getElementById("file_download_url").style.display = "block";
-		
-		// and other buttons non-visible
-		document.getElementById("upload_file").style.display = "none";
-	}
-}
-	
-async function processEvent_user_input(event) {
-
-	if (this.getAttribute("checked") == false) {
-		// Make all buttons non-visible to reset
-		document.getElementById("file_download_url").style.display = "none";
-		document.getElementById("upload_file").style.display = "none";
-	} else  {
-		// If option1 button checked, make option1 all buttons visible
-		document.getElementById("upload_file").style.display = "block";
-
-		// and other buttons non-visible
-		document.getElementById("file_download_url").style.display = "none";
-	}
-}
-
-// ----------------------------------------------------
 	
 // The eventlistener needs to be always running, to detect which file the user selected with browse
 document.getElementById("upload_file").addEventListener("change", previewInput, false);
@@ -260,7 +214,8 @@ async function run_selection() {
 async function run_all_steps_OpenAI_assistant() {
 
 	// Step AA: outputs text to document.getElementById('selected_text') from a GitHub repository file and it saves the file_download_url 
-	await consolidate_inputs_to_blob_url()
+	// text is outputted to document.getElementById('selected_text') with the EventListener
+	await create_blob_url_for_text_data()
 		// Step A: outputs FILE_ID
 		.then(async function() { await upload_files(); })
 		// Step B: outputs ASSISTANT_ID
@@ -304,7 +259,8 @@ async function run_stepsD_to_G_OpenAI_assistant() {
 async function run_all_steps_OpenAI_QandA_finetuning() {
 	
 	// Step A: outputs text to document.getElementById('selected_text') from a GitHub repository file and it saves the file_download_url 
-	await consolidate_inputs_to_blob_url()
+	// text is outputted to document.getElementById('selected_text') with the EventListener
+	await create_blob_url_for_text_data()
 		// Step B: Sort text by timestamp and organize text into an array containing a dictionary, in chronological time order
 		.then(async function() { await sort_text_by_timestamp(); })
 		.catch(error => { document.getElementById('error').innerHTML = error; });
@@ -318,7 +274,8 @@ async function run_all_steps_OpenAI_QandA_finetuning() {
 async function run_all_steps_OpenAI_QandA_finetuning_vector_sim() {
 
 	// Step A: outputs text to document.getElementById('selected_text') from a GitHub repository file and it saves the file_download_url 
-	await consolidate_inputs_to_blob_url()
+	// text is outputted to document.getElementById('selected_text') with the EventListener
+	await create_blob_url_for_text_data()
 		// Step B: Sort text by timestamp and organize text into an array containing a dictionary, in chronological time order
 		.then(async function() { await sort_text_by_timestamp(); })
 		.catch(error => { document.getElementById('error').innerHTML = error; });
@@ -334,32 +291,6 @@ async function run_all_steps_OpenAI_QandA_finetuning_vector_sim() {
 // SUBFUNCTIONS
 // ----------------------------------------------------
 
-// Step AA
-async function consolidate_inputs_to_blob_url() {
-		
-	const github_input_radio = document.getElementById("github_input_radio").checked;
-	const user_input_radio = document.getElementById("user_input_radio").checked;
-	
-	if (github_input_radio == false && user_input_radio == true) {
-		// text is outputted to document.getElementById('selected_text') with the EventListener
-		await create_blob_url_for_text_data();
-	}
-	
-	if (github_input_radio == true && user_input_radio == false) {
-		await GET_text_from_file_wo_auth_GitHub_RESTAPI();
-	}
-	
-	if (github_input_radio == false && user_input_radio == false) {
-		document.getElementById('error').innerHTML += "No input methods are selected. Select a file input method: [Option for GitHub] or [Option for user].";
-	}
-
-	if (github_input_radio == true && user_input_radio == true) {
-		document.getElementById('error').innerHTML += "Both input methods are selected. Select an audio file input method: [Option for GitHub] or [Option for user].";
-	}
-}
-
-// ----------------------------------------------------
-	
 // Step A
 async function upload_files() {
 
@@ -747,64 +678,7 @@ async function print_response_to_frontend() {
 	
 }
 
-	
-// ----------------------------------------------------
 
-	
-async function GET_text_from_file_wo_auth_GitHub_RESTAPI() {
-
-	let url_split = document.getElementById("file_download_url").value.split("/");
-	console.log("url_split:", url_split);
-	desired_filename = url_split.pop();
-	var branch_name = url_split.pop();
-	var repoName = url_split.pop();
-	var repoOwner = url_split.pop();
-	console.log("desired_filename:", desired_filename);
-	console.log("branch_name:", branch_name);
-	console.log("repoName:", repoName);
-	console.log("repoOwner:", repoOwner);
-
-	// -------------------------------------
-	
-	var url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
-
-	var file_objects = [];
-	
-	await fetch(url)
-		.then(res => res.json())
-		.then(data => { 
-			data.forEach(async function(file) {
-				var regexp = new RegExp(`${desired_filename}`, 'g');
-				if (file.type === 'file' && file.name.match(regexp)) {
-					file_objects.push(file);
-				}
-			});
-			return file_objects;
-		})
-		.then(async function (file_objects) {
-			var file_object = file_objects.at(0);
-			console.log("file_object: ", file_object)
-		   
-			var file_download_url = file_object.download_url;
-			document.getElementById("file_download_url").value = file_download_url;
-			document.getElementById('file_download_url').placeholder = file_download_url;
-			console.log("file_download_url:", file_download_url);
-		   
-			sha_val = file_object.sha;
-			// console.log("sha_val:", sha_val);
-
-			return file_download_url;
-		})
-		.then(async function (file_download_url) {
-			// Way 1: to get text from file
-			return await fetch(file_download_url);
-		})
-		.then(response => response.text())
-		.then(async function(text_out) { 
-			document.getElementById("selected_text").innerHTML = text_out;  // print in text area
-		})
-		.catch(error => { console.log(error); });
-}
 
 // ----------------------------------------------------
 
@@ -818,7 +692,6 @@ async function create_blob_url_for_text_data() {
 	document.getElementById("file_download_url").value = url;
 	document.getElementById('file_download_url').placeholder = url;
 }
-
 
 
 // ----------------------------------------------------
