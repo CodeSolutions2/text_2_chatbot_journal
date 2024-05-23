@@ -22,6 +22,7 @@
 <h1></h1>
 
 <h3>[Step 0] Input a file to include in the analysis.</h3>
+<input id="file_download_url" type="text" value="" placeholder="file_download_url" rows="10" cols="100" style="display:none; text-align: left; width: 600px;">
 <input type="file" id="upload_file" accept=".txt" style="display:block">
 <br>
 	
@@ -212,9 +213,7 @@ async function run_selection() {
 // Step 2 : dropdown A
 // ----------------------------------------------------
 async function run_all_steps_OpenAI_assistant() {
-
-	// Step AA: outputs text to document.getElementById('selected_text') from a GitHub repository file and it saves the file_download_url 
-	// text is outputted to document.getElementById('selected_text') with the EventListener
+	
 	await create_blob_url_for_text_data()
 		// Step A: outputs FILE_ID
 		.then(async function() { await upload_files(); })
@@ -258,8 +257,6 @@ async function run_stepsD_to_G_OpenAI_assistant() {
 	
 async function run_all_steps_OpenAI_QandA_finetuning() {
 	
-	// Step A: outputs text to document.getElementById('selected_text') from a GitHub repository file and it saves the file_download_url 
-	// text is outputted to document.getElementById('selected_text') with the EventListener
 	await create_blob_url_for_text_data()
 		// Step B: Sort text by timestamp and organize text into an array containing a dictionary, in chronological time order
 		.then(async function() { await sort_text_by_timestamp(); })
@@ -272,9 +269,7 @@ async function run_all_steps_OpenAI_QandA_finetuning() {
 // Step 2 : dropdown C
 // ----------------------------------------------------
 async function run_all_steps_OpenAI_QandA_finetuning_vector_sim() {
-
-	// Step A: outputs text to document.getElementById('selected_text') from a GitHub repository file and it saves the file_download_url 
-	// text is outputted to document.getElementById('selected_text') with the EventListener
+	
 	await create_blob_url_for_text_data()
 		// Step B: Sort text by timestamp and organize text into an array containing a dictionary, in chronological time order
 		.then(async function() { await sort_text_by_timestamp(); })
@@ -291,6 +286,20 @@ async function run_all_steps_OpenAI_QandA_finetuning_vector_sim() {
 // SUBFUNCTIONS
 // ----------------------------------------------------
 
+async function create_blob_url_for_text_data() {
+	
+	// Put the text data in a temporary blob file, and create a url to the data
+	const blob = new Blob([document.getElementById('selected_text').innerHTML], { type: 'text/csv;charset=utf-8;' });
+	
+	// Create a url for the data object
+	const url = URL.createObjectURL(blob);
+	document.getElementById("file_download_url").value = url;
+	document.getElementById('file_download_url').placeholder = url;
+	console.log('create_blob_url_for_text_data')
+}
+
+// ----------------------------------------------------
+	
 // Step A
 async function upload_files() {
 
@@ -337,6 +346,7 @@ async function upload_files() {
 	} else {
 		document.getElementById('output_FILE_ID').innerHTML = document.getElementById("input_FILE_ID").value;
 	}
+	console.log('upload_files')
 }
 
 // ----------------------------------------------------
@@ -390,7 +400,7 @@ async function create_an_assistant() {
 			.then(async function() { document.getElementById('notification').innerHTML = "STEP B create_an_assistant finished." })
 			.catch(error => { document.getElementById('error').innerHTML = error; });
 	}
-  
+	console.log('create_an_assistant')
 }
 
 
@@ -442,6 +452,7 @@ async function create_a_thread() {
 			.then(async function() { document.getElementById('notification').innerHTML = "STEP C create_a_thread finished." })
 		 	.catch(error => { document.getElementById('error').innerHTML = error; });
 	}
+	console.log('create_a_thread')
 	
 }
 	
@@ -475,6 +486,8 @@ async function add_a_message_to_a_thread() {
 		})
 		.then(async function() { document.getElementById('notification').innerHTML = "STEP D add_a_message_to_a_thread finished." })
 	 	.catch(error => { document.getElementById('error').innerHTML = error; });
+
+	console.log('create_a_thread')
 }
 
 // ----------------------------------------------------
@@ -677,22 +690,6 @@ async function print_response_to_frontend() {
 	tbl.appendChild(tblBody);
 	
 }
-
-
-
-// ----------------------------------------------------
-
-async function create_blob_url_for_text_data() {
-	
-	// Put the text data in a temporary blob file, and create a url to the data
-	const blob = new Blob([document.getElementById('selected_text').innerHTML], { type: 'text/csv;charset=utf-8;' });
-	
-	// Create a url for the data object
-	const url = URL.createObjectURL(blob);
-	document.getElementById("file_download_url").value = url;
-	document.getElementById('file_download_url').placeholder = url;
-}
-
 
 // ----------------------------------------------------
 
