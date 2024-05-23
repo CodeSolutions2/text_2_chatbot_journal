@@ -11,8 +11,4 @@ Chat-bot technology used in a self-transformative manner can be the start of a n
 
 Input text data and/or other data into a journal, train a chatbot with the journal data, ask the chatbot questions about the journal data for better self understanding.
 
-
-[Version where text file is read from repository] https://codesolutions2.github.io/text_2_chatbot_journal/index.html
-The journal_data.txt file contains a handful of my own journal entries for public sharing to demonstrate this digital twin webapp; the majority of entries are audio transcriptions that were recorded throughout the day or during exercise. Therefore, creating a digital journal of ideas (digital twin) is not a difficult or time-consuming task. Audio files can be transcribed to text, and the text can be used to train a chatbot or digital twin of one's self, such that one can learn about one's self and thus make better decisions.
-
 [Version where text file is upload - anyone can use their data with the application] https://codesolutions2.github.io/text_2_chatbot_journal/index2.html
