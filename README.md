@@ -12,3 +12,5 @@ Chat-bot technology used in a self-transformative manner can be the start of a n
 Input text data and/or other data into a journal, train a chatbot with the journal data, ask the chatbot questions about the journal data for better self understanding.
 
 [**Upload your data to the FrontEnd App Here**] https://codesolutions2.github.io/text_2_chatbot_journal/index2.html
+
+![alt_text](text_2_chatbot.png)
